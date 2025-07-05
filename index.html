@@ -192,24 +192,23 @@
         <section id="upload-section" class="card">
             <h2><i class="fas fa-upload"></i> Upload PDF</h2>
             <div class="upload-area" id="uploadArea">
- caricature of a PDF file being uploaded with a progress bar, surrounded by glowing particles for a futuristic feel, all in a vibrant indigo and white color scheme." />
                 <p>Drag & Drop your PDF here or click to browse</p>
                 <input type="file" id="pdfInput" accept=".pdf" hidden>
             </div>
-            <button id="uploadBtn" disabled>Upload PDF</button>
+            <button id="uploadBtn" onclick="uploadPDF()" disabled>Upload PDF</button>
             <div id="uploadStatus" class="status"></div>
         </section>
         
         <section id="summary-section" class="card">
             <h2><i class="fas fa-file-alt"></i> Summary</h2>
-            <div idificata="summary" class="content">Upload a PDF to see its summary.</div>
+            <div id="summary" class="content">Upload a PDF to see its summary.</div>
         </section>
         
         <section id="qa-section" class="card">
             <h2><i class="fas fa-question-circle"></i> Ask a Question</h2>
             <div class="input-group">
                 <input type="text" id="questionInput" placeholder="Ask about the PDF content...">
-                <button id="questionBtn" disabled>Submit</button>
+                <button id="questionBtn" onclick="askQuestion()" disabled>Submit</button>
             </div>
             <div id="answer" class="content">Answers will appear here.</div>
             <div id="qaStatus" class="status"></div>
@@ -227,11 +226,12 @@
             const pdfInput = document.getElementById('pdfInput');
             const uploadBtn = document.getElementById('uploadBtn');
 
-            // Enable upload button when a file is selected
+            // Enable upload button and show file name
             pdfInput.addEventListener('change', () => {
                 uploadBtn.disabled = !pdfInput.files[0];
-                document.getElementById('uploadStatus').textContent = pdfInput.files[0] ? `Selected: ${pdfInput.files[0].name}` : '';
-                document.getElementById('uploadStatus').classList.remove('error', 'success');
+                const status = document.getElementById('uploadStatus');
+                status.textContent = pdfInput.files[0] ? `Selected: ${pdfInput.files[0].name}` : '';
+                status.classList.remove('error', 'success');
             });
 
             // Drag and drop handling
@@ -248,8 +248,9 @@
                 uploadArea.classList.remove('active');
                 pdfInput.files = e.dataTransfer.files;
                 uploadBtn.disabled = !pdfInput.files[0];
-                document.getElementById('uploadStatus').textContent = pdfInput.files[0] ? `Selected: ${pdfInput.files[0].name}` : '';
-                document.getElementById('uploadStatus').classList.remove('error', 'success');
+                const status = document.getElementById('uploadStatus');
+                status.textContent = pdfInput.files[0] ? `Selected: ${pdfInput.files[0].name}` : '';
+                status.classList.remove('error', 'success');
             });
         });
 
@@ -286,13 +287,9 @@
                     body: formData
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
                 const result = await response.json();
-                if (result.error) {
-                    throw new Error(result.error);
+                if (!response.ok) {
+                    throw new Error(result.error || `HTTP error! Status: ${response.status}`);
                 }
 
                 extractedText = result.text;
@@ -302,6 +299,7 @@
                 status.classList.remove('error');
                 document.getElementById('questionBtn').disabled = false;
                 pdfInput.value = ''; // Reset file input
+                uploadBtn.disabled = true; // Disable button until new file is selected
             } catch (error) {
                 console.error('Upload error:', error);
                 status.textContent = `Error: ${error.message}`;
@@ -344,13 +342,9 @@
                     body: JSON.stringify({ question, context: extractedText })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
                 const result = await response.json();
-                if (result.error) {
-                    throw new Error(result.error);
+                if (!response.ok) {
+                    throw new Error(result.error || `HTTP error! Status: ${response.status}`);
                 }
 
                 answer.textContent = result.answer || 'No answer available.';
