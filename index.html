@@ -1,38 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smart PDF Reader</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI PDF Reader</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>📄 Smart PDF Reader</h1>
-
-    <form id="uploadForm">
-      <input type="file" id="pdfFile" accept="application/pdf" required />
-      <button type="submit">Upload & Analyze</button>
-    </form>
-
-    <div id="summarySection" class="hidden">
-      <h2>📝 Summary</h2>
-      <p id="summaryText"></p>
-    </div>
-
-    <div id="qaSection" class="hidden">
-      <h2>❓ Ask a Question</h2>
-      <input type="text" id="questionInput" placeholder="Type your question..." />
-      <button id="askBtn">Ask</button>
-      <p id="answerText"></p>
-    </div>
-
-    <div id="relatedSection" class="hidden">
-      <h2>🔗 Related Content</h2>
-      <ul id="relatedList"></ul>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
+    <header>
+        <h1>AI-Powered PDF Reader</h1>
+    </header>
+    <main>
+        <section id="upload-section" class="card">
+            <h2>Upload PDF</h2>
+            <input type="file" id="pdfInput" accept=".pdf">
+            <button id="uploadBtn" onclick="uploadPDF()">Upload PDF</button>
+            <div id="uploadStatus" class="status"></div>
+        </section>
+        
+        <section id="summary-section" class="card">
+            <h2>Summary</h2>
+            <div id="summary" class="content">Upload a PDF to see its summary.</div>
+        </section>
+        
+        <section id="qa-section" class="card">
+            <h2>Ask a Question</h2>
+            <input type="text" id="questionInput" placeholder="Ask about the PDF content...">
+            <button id="questionBtn" onclick="askQuestion()">Submit Question</button>
+            <div id="answer" class="content">Answers will appear here.</div>
+            <div id="qaStatus" class="status"></div>
+        </section>
+    </main>
+    <script src="js/app.js"></script>
 </body>
 </html>
