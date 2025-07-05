@@ -5,32 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI PDF Reader</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <header>
+    <header class="header">
         <h1>AI-Powered PDF Reader</h1>
+        <p>Upload, Summarize, and Query Your PDFs with Ease</p>
     </header>
-    <main>
+    <main class="container">
         <section id="upload-section" class="card">
-            <h2>Upload PDF</h2>
-            <input type="file" id="pdfInput" accept=".pdf">
-            <button id="uploadBtn" onclick="uploadPDF()">Upload PDF</button>
+            <h2><i class="fas fa-upload"></i> Upload PDF</h2>
+            <div class="upload-area" id="uploadArea">
+                <p>Drag & Drop your PDF here or click to browse</p>
+                <input type="file" id="pdfInput" accept=".pdf" hidden>
+            </div>
+            <button id="uploadBtn" disabled>Upload PDF</button>
             <div id="uploadStatus" class="status"></div>
         </section>
         
         <section id="summary-section" class="card">
-            <h2>Summary</h2>
+            <h2><i class="fas fa-file-alt"></i> Summary</h2>
             <div id="summary" class="content">Upload a PDF to see its summary.</div>
         </section>
         
         <section id="qa-section" class="card">
-            <h2>Ask a Question</h2>
-            <input type="text" id="questionInput" placeholder="Ask about the PDF content...">
-            <button id="questionBtn" onclick="askQuestion()">Submit Question</button>
+            <h2><i class="fas fa-question-circle"></i> Ask a Question</h2>
+            <div class="input-group">
+                <input type="text" id="questionInput" placeholder="Ask about the PDF content...">
+                <button id="questionBtn" disabled>Submit</button>
+            </div>
             <div id="answer" class="content">Answers will appear here.</div>
             <div id="qaStatus" class="status"></div>
         </section>
     </main>
+    <footer>
+        <p>&copy; 2025 AI PDF Reader. Powered by OpenAI.</p>
+    </footer>
     <script src="app.js"></script>
 </body>
 </html>
