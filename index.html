@@ -361,7 +361,6 @@
         </p>
     </footer>
     <script>
-        const API_BASE_URL = 'https://smart-pdf-reader-backend.onrender.com';
         let extractedText = '';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -447,9 +446,10 @@
             window.simulateProgress();
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/upload`, {
+                const response = await fetch('/api/upload', {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
@@ -503,10 +503,11 @@
             answer.classList.remove('slide-in');
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/ask`, {
+                const response = await fetch('/api/ask', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question, context: extractedText })
+                    body: JSON.stringify({ question, context: extractedText }),
+                    credentials: 'include'
                 });
 
                 const result = await response.json();
