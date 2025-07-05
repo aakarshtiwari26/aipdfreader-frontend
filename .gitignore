@@ -18,4 +18,5 @@ dist/
 build/
 
 # Vercel local config (optional)
+.vercel
 .vercel/
