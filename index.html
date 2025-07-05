@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart PDF Analyzer</title>
+    <title>AI PDF Reader</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,10 +14,10 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #e6e7ff 0%, #b4c1ff 100%);
-            color: #1e293b;
-            line-height: 1.6;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(145deg, #f0f7fa 0%, #d9e8ed 100%);
+            color: #1c2526;
+            line-height: 1.7;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -25,89 +26,93 @@
 
         .header {
             text-align: center;
-            padding: 3rem 1rem;
-            background: rgba(255, 255, 255, 0.97);
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            padding: 2rem 1.5rem;
+            background: #ffffff;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             position: sticky;
             top: 0;
             z-index: 10;
+            transition: transform 0.3s ease;
+        }
+
+        .header.sticky {
+            transform: translateY(0);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         }
 
         .header h1 {
-            font-size: clamp(2rem, 5vw, 3.2rem);
-            font-weight: 800;
-            color: #1e293b;
+            font-size: clamp(1.8rem, 5vw, 3.5rem);
+            font-weight: 700;
+            color: #1a4d5f;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             margin-bottom: 0.5rem;
         }
 
         .header p {
-            font-size: clamp(1rem, 2.2vw, 1.2rem);
-            color: #64748b;
+            font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+            color: #5e6e70;
             max-width: 600px;
             margin: 0 auto;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 3rem auto;
-            padding: 0 1.5rem;
+            max-width: 1300px;
+            margin: 3.5rem auto;
+            padding: 0 2rem;
             flex: 1;
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.92);
-            border-radius: 16px;
-            padding: 2.5rem;
-            margin-bottom: 3rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 3.5rem;
+            box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.05), -8px -8px 16px rgba(255, 255, 255, 0.8);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            backdrop-filter: blur(10px);
         }
 
         .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+            transform: translateY(-10px);
+            box-shadow: 12px 12px 24px rgba(0, 0, 0, 0.1), -12px -12px 24px rgba(255, 255, 255, 0.9);
         }
 
         h2 {
-            font-size: clamp(1.6rem, 3.5vw, 2rem);
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 1.5rem;
+            font-size: clamp(1.8rem, 3.5vw, 2.2rem);
+            font-weight: 600;
+            color: #1a4d5f;
+            margin-bottom: 1.75rem;
             display: flex;
             align-items: center;
             text-transform: uppercase;
         }
 
         h2 i {
-            margin-right: 0.75rem;
-            color: #5b5cff;
-            font-size: 1.6rem;
+            margin-right: 0.8rem;
+            color: #1a4d5f;
+            font-size: 1.8rem;
         }
 
         .upload-area {
-            border: 2px dashed #b4c1ff;
+            border: 2px dashed #a3b7be;
             border-radius: 12px;
-            padding: 2.5rem;
+            padding: 3rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.1);
-            margin-bottom: 1.5rem;
+            background: #f9fbfc;
+            margin-bottom: 2rem;
         }
 
         .upload-area:hover, .upload-area.active {
-            border-color: #5b5cff;
-            background: rgba(91, 92, 255, 0.05);
-            transform: scale(1.015);
+            border-color: #1a4d5f;
+            background: #e6f0f3;
+            transform: scale(1.02);
         }
 
         .upload-area p {
-            color: #475569;
-            font-size: clamp(1rem, 2.2vw, 1.1rem);
+            color: #5e6e70;
+            font-size: clamp(1rem, 2.2vw, 1.2rem);
             font-weight: 500;
         }
 
@@ -117,18 +122,19 @@
 
         input[type="text"] {
             width: 100%;
-            padding: 1rem 1.2rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: clamp(0.9rem, 2vw, 1rem);
+            padding: 1rem 1.5rem;
+            border: 1px solid #d4dde0;
+            border-radius: 12px;
+            font-size: clamp(0.95rem, 2vw, 1.1rem);
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.95);
+            background: #ffffff;
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05);
         }
 
         input[type="text"]:focus {
             outline: none;
-            border-color: #5b5cff;
-            box-shadow: 0 0 0 4px rgba(91, 92, 255, 0.15);
+            border-color: #1a4d5f;
+            box-shadow: 0 0 0 4px rgba(26, 77, 95, 0.15);
         }
 
         .input-group {
@@ -138,23 +144,24 @@
         }
 
         button {
-            background: linear-gradient(90deg, #5b5cff, #7c3aed);
+            background: #1a4d5f;
             color: #ffffff;
-            padding: 1rem 2.5rem;
+            padding: 1rem 3rem;
             border: none;
-            border-radius: 10px;
-            font-size: clamp(0.9rem, 2vw, 1rem);
+            border-radius: 12px;
+            font-size: clamp(0.95rem, 2vw, 1.1rem);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 0.6px;
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1), -4px -4px 8px rgba(255, 255, 255, 0.8);
         }
 
         button:hover:not(:disabled) {
-            background: linear-gradient(90deg, #4f46e5, #6d28d9);
+            background: #153f4e;
             transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(91, 92, 255, 0.3);
+            box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.15), -6px -6px 12px rgba(255, 255, 255, 0.9);
         }
 
         button:disabled {
@@ -165,100 +172,101 @@
         }
 
         .content {
-            font-size: clamp(0.9rem, 2vw, 1rem);
-            color: #1e293b;
-            background: #f8fafc;
-            padding: 1.5rem;
-            border-radius: 10px;
-            min-height: 150px;
+            font-size: clamp(0.95rem, 2vw, 1.1rem);
+            color: #1c2526;
+            background: #f9fbfc;
+            padding: 2rem;
+            border-radius: 12px;
+            min-height: 180px;
             line-height: 1.8;
-            transition: opacity 0.3s ease;
+            transition: transform 0.3s ease;
         }
 
-        .content.fade-in {
-            animation: fadeIn 0.5s ease-in;
+        .content.slide-in {
+            animation: slideIn 0.5s ease-in;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         .status {
-            margin-top: 1.25rem;
-            font-size: clamp(0.85rem, 1.8vw, 0.95rem);
-            color: #64748b;
+            margin-top: 1.5rem;
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
+            color: #5e6e70;
             font-weight: 500;
             transition: color 0.3s ease;
         }
 
         .status.error {
-            color: #ef4444;
+            color: #ff3b30;
         }
 
         .status.success {
-            color: #10b981;
+            color: #34c759;
         }
 
-        .progress-bar {
+        .progress-circle {
             display: none;
-            width: 100%;
-            height: 6px;
-            background: #e2e8f0;
-            border-radius: 3px;
-            margin: 1.25rem 0;
-            overflow: hidden;
+            width: 40px;
+            height: 40px;
+            margin: 1.5rem auto;
+            border: 4px solid #e2e8f0;
+            border-top-color: #1a4d5f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .progress-bar.active {
+        .progress-circle.active {
             display: block;
         }
 
-        .progress-bar div {
-            width: 0;
-            height: 100%;
-            background: #5b5cff;
-            transition: width 0.3s ease;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         footer {
             text-align: center;
             padding: 2rem;
-            color: #64748b;
-            font-size: clamp(0.85rem, 1.8vw, 0.95rem);
-            background: rgba(255, 255, 255, 0.97);
-            backdrop-filter: blur(12px);
-            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            color: #5e6e70;
+            font-size: clamp(0.9rem, 1.8vw, 1rem);
+            background: #ffffff;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
         }
 
         footer a {
-            color: #5b5cff;
+            color: #1a4d5f;
             text-decoration: none;
             font-weight: 600;
             transition: color 0.3s ease;
         }
 
         footer a:hover {
-            color: #4f46e5;
+            color: #153f4e;
             text-decoration: underline;
         }
 
         @media (max-width: 1024px) {
             .container {
                 max-width: 95%;
-                margin: 2rem auto;
+                margin: 2.5rem auto;
             }
             .card {
                 padding: 2rem;
+            }
+            .upload-area {
+                padding: 2rem;
+                margin-bottom: 1.5rem;
             }
         }
 
         @media (max-width: 768px) {
             .header {
-                padding: 2rem 1rem;
+                padding: 1.5rem 1rem;
             }
             .header h1 {
-                font-size: clamp(1.5rem, 4vw, 2rem);
+                font-size: clamp(1.5rem, 4vw, 2.2rem);
             }
             .card {
                 padding: 1.5rem;
@@ -272,18 +280,17 @@
                 width: 100%;
                 padding: 0.9rem;
             }
-            .upload-area {
-                padding: 2rem;
-                margin-bottom: 1rem;
-            }
             .content {
-                min-height: 120px;
+                min-height: 140px;
+            }
+            .upload-area {
+                padding: 1.5rem;
             }
         }
 
         @media (max-width: 480px) {
             .header h1 {
-                font-size: clamp(1.3rem, 3.5vw, 1.6rem);
+                font-size: clamp(1.3rem, 3.5vw, 1.8rem);
             }
             .header p {
                 font-size: clamp(0.85rem, 2vw, 0.95rem);
@@ -296,10 +303,17 @@
                 margin-bottom: 1.5rem;
             }
             .upload-area {
-                padding: 1.5rem;
+                padding: 1.25rem;
+                margin-bottom: 1rem;
             }
-            .progress-bar {
-                height: 5px;
+            .content {
+                padding: 1.25rem;
+                min-height: 120px;
+            }
+            .progress-circle {
+                width: 32px;
+                height: 32px;
+                border-width: 3px;
             }
             footer {
                 padding: 1.5rem;
@@ -309,7 +323,7 @@
 </head>
 <body>
     <header class="header">
-        <h1>Smart PDF Analyzer</h1>
+        <h1>AI PDF Reader</h1>
         <p>Effortlessly Upload, Summarize, and Query Your PDFs</p>
     </header>
     <main class="container">
@@ -320,9 +334,7 @@
                 <input type="file" id="pdfInput" accept=".pdf" hidden>
             </div>
             <button id="uploadBtn" onclick="uploadPDF()" disabled>Upload PDF</button>
-            <div class="progress-bar" id="progressBar">
-                <div id="progress"></div>
-            </div>
+            <div class="progress-circle" id="progressCircle"></div>
             <div id="uploadStatus" class="status"></div>
         </section>
         
@@ -342,11 +354,11 @@
         </section>
     </main>
     <footer>
-      <p>
-        © 2025 Smart PDF Analyzer. All rights reserved.<br />
-        Designed & Developed by
-        <a href="https://www.linkedin.com/in/aakarshtiwari/" target="_blank">Aakarsh Tiwari</a>
-      </p>
+        <p>
+            © 2025 AI PDF Reader. All rights reserved.<br />
+            Designed & Developed by
+            <a href="https://www.linkedin.com/in/aakarshtiwari/" target="_blank">Aakarsh Tiwari</a>
+        </p>
     </footer>
     <script>
         const API_BASE_URL = 'https://smart-pdf-reader-backend.onrender.com';
@@ -356,10 +368,15 @@
             const uploadArea = document.getElementById('uploadArea');
             const pdfInput = document.getElementById('pdfInput');
             const uploadBtn = document.getElementById('uploadBtn');
-            const progressBar = document.getElementById('progressBar');
-            const progress = document.getElementById('progress');
+            const progressCircle = document.getElementById('progressCircle');
             const summary = document.getElementById('summary');
             const answer = document.getElementById('answer');
+
+            // Sticky header effect
+            window.addEventListener('scroll', () => {
+                const header = document.querySelector('.header');
+                header.classList.toggle('sticky', window.scrollY > 0);
+            });
 
             // Enable upload button and show file name
             pdfInput.addEventListener('change', () => {
@@ -388,22 +405,12 @@
                 status.classList.remove('error', 'success');
             });
 
-            // Simulate progress bar
+            // Simulate progress circle
             function simulateProgress() {
-                progressBar.classList.add('active');
-                progress.style.width = '0%';
-                let width = 0;
-                const interval = setInterval(() => {
-                    width += 10;
-                    progress.style.width = `${width}%`;
-                    if (width >= 100) {
-                        clearInterval(interval);
-                        setTimeout(() => {
-                            progressBar.classList.remove('active');
-                            progress.style.width = '0%';
-                        }, 500);
-                    }
-                }, 200);
+                progressCircle.classList.add('active');
+                setTimeout(() => {
+                    progressCircle.classList.remove('active');
+                }, 2000);
             }
 
             // Expose simulateProgress to uploadPDF
@@ -436,7 +443,7 @@
             uploadBtn.disabled = true;
             status.textContent = 'Uploading and processing PDF...';
             status.classList.remove('error', 'success');
-            summary.classList.remove('fade-in');
+            summary.classList.remove('slide-in');
             window.simulateProgress();
 
             try {
@@ -452,7 +459,7 @@
 
                 extractedText = result.text;
                 summary.textContent = result.summary || 'No summary available.';
-                summary.classList.add('fade-in');
+                summary.classList.add('slide-in');
                 status.textContent = 'PDF processed successfully!';
                 status.classList.add('success');
                 status.classList.remove('error');
@@ -493,7 +500,7 @@
             questionBtn.disabled = true;
             status.textContent = 'Fetching answer...';
             status.classList.remove('error', 'success');
-            answer.classList.remove('fade-in');
+            answer.classList.remove('slide-in');
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/ask`, {
@@ -508,7 +515,7 @@
                 }
 
                 answer.textContent = result.answer || 'No answer available.';
-                answer.classList.add('fade-in');
+                answer.classList.add('slide-in');
                 status.textContent = 'Question answered successfully!';
                 status.classList.add('success');
                 status.classList.remove('error');
