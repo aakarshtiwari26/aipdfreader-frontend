@@ -9,7 +9,7 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "https://smart-pdf-reader-backend.onrender.com/api/$1"
+            "dest": "https://aipdfreader-0f7m.onrender.com/api/$1"
         },
         {
             "src": "/(.*)",

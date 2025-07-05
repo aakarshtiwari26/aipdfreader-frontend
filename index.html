@@ -371,13 +371,11 @@
             const summary = document.getElementById('summary');
             const answer = document.getElementById('answer');
 
-            // Sticky header effect
             window.addEventListener('scroll', () => {
                 const header = document.querySelector('.header');
                 header.classList.toggle('sticky', window.scrollY > 0);
             });
 
-            // Enable upload button and show file name
             pdfInput.addEventListener('change', () => {
                 uploadBtn.disabled = !pdfInput.files[0];
                 const status = document.getElementById('uploadStatus');
@@ -385,7 +383,6 @@
                 status.classList.remove('error', 'success');
             });
 
-            // Drag and drop handling
             uploadArea.addEventListener('click', () => pdfInput.click());
             uploadArea.addEventListener('dragover', (e) => {
                 e.preventDefault();
@@ -404,7 +401,6 @@
                 status.classList.remove('error', 'success');
             });
 
-            // Simulate progress circle
             function simulateProgress() {
                 progressCircle.classList.add('active');
                 setTimeout(() => {
@@ -412,7 +408,6 @@
                 }, 2000);
             }
 
-            // Expose simulateProgress to uploadPDF
             window.simulateProgress = simulateProgress;
         });
 
