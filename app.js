@@ -12,7 +12,7 @@ uploadForm.addEventListener("submit", async (e) => {
   const formData = new FormData();
   formData.append("pdf", file);
 
-  const res = await fetch("https://smart-pdf-reader-backend.vercel.app/upload", {
+  const res = await fetch("https://smart-pdf-reader-backend.vercel.app/api/upload", {
     method: "POST",
     body: formData,
   });
@@ -34,7 +34,7 @@ uploadForm.addEventListener("submit", async (e) => {
 
 askBtn.addEventListener("click", async () => {
   const question = questionInput.value;
-  const res = await fetch("https://smart-pdf-reader-backend.vercel.app/ask", {
+  const res = await fetch("https://smart-pdf-reader-backend.vercel.app/api/ask", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ question }),
