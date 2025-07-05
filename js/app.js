@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://your-render-backend-url'; // Replace with Render backend URL
+const API_BASE_URL = 'https://smart-pdf-reader-backend.onrender.com'; // Replace with Render backend URL
 let extractedText = '';
 
 async function uploadPDF() {
