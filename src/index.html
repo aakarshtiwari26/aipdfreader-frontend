@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart PDF Reader</title>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>📄 Smart PDF Reader</h1>
+
+    <form id="uploadForm">
+      <input type="file" id="pdfFile" accept="application/pdf" required />
+      <button type="submit">Upload & Analyze</button>
+    </form>
+
+    <div id="summarySection" class="hidden">
+      <h2>📝 Summary</h2>
+      <p id="summaryText"></p>
+    </div>
+
+    <div id="qaSection" class="hidden">
+      <h2>❓ Ask a Question</h2>
+      <input type="text" id="questionInput" placeholder="Type your question..." />
+      <button id="askBtn">Ask</button>
+      <p id="answerText"></p>
+    </div>
+
+    <div id="relatedSection" class="hidden">
+      <h2>🔗 Related Content</h2>
+      <ul id="relatedList"></ul>
+    </div>
+  </div>
+
+  <script src="./js/app.js"></script>
+</body>
+</html>

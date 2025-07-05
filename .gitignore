@@ -1,0 +1,21 @@
+# Node modules (if you ever use npm packages for tooling)
+node_modules/
+
+# Environment variables (if you use any)
+.env
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor/IDE settings
+.vscode/
+.idea/
+*.swp
+
+# Build artifacts (if you use a bundler like Webpack or Vite later)
+dist/
+build/
+
+# Vercel local config (optional)
+.vercel/

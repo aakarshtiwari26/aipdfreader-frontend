@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://smart-pdf-reader-backend.vercel.app/api/$1" }
+  ]
+}
