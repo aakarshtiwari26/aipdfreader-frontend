@@ -14,7 +14,7 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #4f46e5 0%, #a5b4fc 100%);
+            background: linear-gradient(135deg, #e6e7ff 0%, #b4c1ff 100%);
             color: #1e293b;
             line-height: 1.6;
             min-height: 100vh;
@@ -25,72 +25,73 @@
 
         .header {
             text-align: center;
-            padding: 3rem 1rem;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem 1rem;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
         .header h1 {
-            font-size: clamp(2rem, 5vw, 3rem);
+            font-size: clamp(1.8rem, 4.5vw, 2.8rem);
             font-weight: 800;
             color: #1e293b;
-            margin-bottom: 0.5rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.2px;
+            margin-bottom: 0.5rem;
         }
 
         .header p {
-            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
             color: #64748b;
-            max-width: 600px;
+            max-width: 500px;
             margin: 0 auto;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 2rem auto;
             padding: 0 1rem;
             flex: 1;
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 14px;
             padding: 2rem;
             margin-bottom: 2rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
         }
 
         .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+            transform: translateY(-6px);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
         }
 
         h2 {
-            font-size: clamp(1.5rem, 3.5vw, 2rem);
+            font-size: clamp(1.4rem, 3vw, 1.8rem);
             font-weight: 700;
             color: #1e293b;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             display: flex;
             align-items: center;
+            text-transform: uppercase;
         }
 
         h2 i {
-            margin-right: 0.75rem;
-            color: #4f46e5;
-            font-size: 1.5rem;
+            margin-right: 0.6rem;
+            color: #5b5cff;
+            font-size: 1.4rem;
         }
 
         .upload-area {
-            border: 2px dashed #a5b4fc;
-            border-radius: 12px;
-            padding: 2.5rem;
+            border: 2px dashed #b4c1ff;
+            border-radius: 10px;
+            padding: 2rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -98,14 +99,14 @@
         }
 
         .upload-area:hover, .upload-area.active {
-            border-color: #4f46e5;
-            background: rgba(79, 70, 229, 0.05);
-            transform: scale(1.02);
+            border-color: #5b5cff;
+            background: rgba(91, 92, 255, 0.05);
+            transform: scale(1.015);
         }
 
         .upload-area p {
             color: #475569;
-            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            font-size: clamp(0.95rem, 2vw, 1.05rem);
             font-weight: 500;
         }
 
@@ -115,18 +116,18 @@
 
         input[type="text"] {
             width: 100%;
-            padding: 0.75rem 1rem;
+            padding: 0.8rem 1rem;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
-            font-size: clamp(0.9rem, 2vw, 1rem);
+            font-size: clamp(0.85rem, 1.8vw, 0.95rem);
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
         }
 
         input[type="text"]:focus {
             outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+            border-color: #5b5cff;
+            box-shadow: 0 0 0 3px rgba(91, 92, 255, 0.15);
         }
 
         .input-group {
@@ -136,12 +137,12 @@
         }
 
         button {
-            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            background: linear-gradient(90deg, #5b5cff, #7c3aed);
             color: #ffffff;
-            padding: 0.75rem 2rem;
+            padding: 0.8rem 2rem;
             border: none;
             border-radius: 8px;
-            font-size: clamp(0.9rem, 2vw, 1rem);
+            font-size: clamp(0.85rem, 1.8vw, 0.95rem);
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -150,9 +151,9 @@
         }
 
         button:hover:not(:disabled) {
-            background: linear-gradient(90deg, #4338ca, #6d28d9);
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            background: linear-gradient(90deg, #4f46e5, #6d28d9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(91, 92, 255, 0.3);
         }
 
         button:disabled {
@@ -163,18 +164,28 @@
         }
 
         .content {
-            font-size: clamp(0.9rem, 2vw, 1rem);
+            font-size: clamp(0.85rem, 1.8vw, 0.95rem);
             color: #1e293b;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 1.5rem;
+            background: #f8fafc;
+            padding: 1.25rem;
             border-radius: 8px;
-            min-height: 120px;
-            line-height: 1.8;
+            min-height: 100px;
+            line-height: 1.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .content.fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .status {
             margin-top: 1rem;
-            font-size: clamp(0.85rem, 2vw, 0.95rem);
+            font-size: clamp(0.8rem, 1.7vw, 0.9rem);
             color: #64748b;
             font-weight: 500;
             transition: color 0.3s ease;
@@ -188,20 +199,10 @@
             color: #10b981;
         }
 
-        footer {
-            text-align: center;
-            padding: 1.5rem;
-            color: #64748b;
-            font-size: clamp(0.8rem, 2vw, 0.9rem);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
-        }
-
         .progress-bar {
             display: none;
             width: 100%;
-            height: 6px;
+            height: 5px;
             background: #e2e8f0;
             border-radius: 3px;
             margin-top: 1rem;
@@ -215,8 +216,231 @@
         .progress-bar div {
             width: 0;
             height: 100%;
-            background: #4f46e5;
+            background: #5b5cff;
             transition: width 0.3s ease;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #64748b;
+            font-size: clamp(0.8rem, 1.7vw, 0.9rem);
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        footer a {
+            color: #5b5cff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #4f46e5;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                max-width: 90%;
+            }
+            .card {
+                padding: 1.5rem;
+            }
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            flex: 1;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 14px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.15);
+        }
+
+        h2 {
+            font-size: clamp(1.4rem, 3vw, 1.8rem);
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            text-transform: uppercase;
+        }
+
+        h2 i {
+            margin-right: 0.6rem;
+            color: #5b5cff;
+            font-size: 1.4rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #b4c1ff;
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .upload-area:hover, .upload-area.active {
+            border-color: #5b5cff;
+            background: rgba(91, 92, 255, 0.05);
+            transform: scale(1.015);
+        }
+
+        .upload-area p {
+            color: #475569;
+            font-size: clamp(0.95rem, 2vw, 1.05rem);
+            font-weight: 500;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #5b5cff;
+            box-shadow: 0 0 0 3px rgba(91, 92, 255, 0.15);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        button {
+            background: linear-gradient(90deg, #5b5cff, #7c3aed);
+            color: #ffffff;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover:not(:disabled) {
+            background: linear-gradient(90deg, #4f46e5, #6d28d9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(91, 92, 255, 0.3);
+        }
+
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .content {
+            font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+            color: #1e293b;
+            background: #f8fafc;
+            padding: 1.25rem;
+            border-radius: 8px;
+            min-height: 100px;
+            line-height: 1.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .content.fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .status {
+            margin-top: 1rem;
+            font-size: clamp(0.8rem, 1.7vw, 0.9rem);
+            color: #64748b;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .status.error {
+            color: #ef4444;
+        }
+
+        .status.success {
+            color: #10b981;
+        }
+
+        .progress-bar {
+            display: none;
+            width: 100%;
+            height: 5px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-bar.active {
+            display: block;
+        }
+
+        .progress-bar div {
+            width: 0;
+            height: 100%;
+            background: #5b5cff;
+            transition: width 0.3s ease;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #64748b;
+            font-size: clamp(0.8rem, 1.7vw, 0.9rem);
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        footer a {
+            color: #5b5cff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #4f46e5;
+            text-decoration: underline;
         }
 
         @media (max-width: 1024px) {
@@ -233,7 +457,7 @@
                 padding: 2rem 1rem;
             }
             .header h1 {
-                font-size: clamp(1.5rem, 4vw, 2rem);
+                font-size: clamp(1.4rem, 3.5vw, 1.8rem);
             }
             .card {
                 padding: 1.25rem;
@@ -249,13 +473,17 @@
 
         @media (max-width: 480px) {
             .header h1 {
-                font-size: clamp(1.25rem, 3.5vw, 1.5rem);
+                font-size: clamp(1.2rem, 3vw, 1.5rem);
             }
             .upload-area {
                 padding: 1.5rem;
             }
             .card {
-                margin-bottom: 1.5rem;
+                margin-bottom: 1.25rem;
+                padding: 1rem;
+            }
+            .progress-bar {
+                height: 4px;
             }
         }
     </style>
@@ -263,9 +491,9 @@
 <body>
     <header class="header">
         <h1>AI-Powered PDF Reader</h1>
-        <p>Effortlessly Upload, Summarize, and Query Your PDFs</p>
+        <p>Seamlessly Upload, Summarize, and Query Your PDFs</p>
     </header>
-    <main class="contrainer">
+    <main class="container">
         <section id="upload-section" class="card">
             <h2><i class="fas fa-upload"></i> Upload PDF</h2>
             <div class="upload-area" id="uploadArea">
@@ -295,7 +523,11 @@
         </section>
     </main>
     <footer>
-        <p>© 2025 AI PDF Reader. Powered by OpenAI.</p>
+      <p>
+        © 2025 AI PDF Reader. All rights reserved.<br />
+        Designed & Developed by
+        <a href="https://www.linkedin.com/in/aakarshtiwari/" target="_blank">Aakarsh Tiwari</a>
+      </p>
     </footer>
     <script>
         const API_BASE_URL = 'https://smart-pdf-reader-backend.onrender.com';
@@ -307,6 +539,8 @@
             const uploadBtn = document.getElementById('uploadBtn');
             const progressBar = document.getElementById('progressBar');
             const progress = document.getElementById('progress');
+            const summary = document.getElementById('summary');
+            const answer = document.getElementById('answer');
 
             // Enable upload button and show file name
             pdfInput.addEventListener('change', () => {
@@ -335,7 +569,7 @@
                 status.classList.remove('error', 'success');
             });
 
-            // Simulate progress bar (for visual feedback)
+            // Simulate progress bar
             function simulateProgress() {
                 progressBar.classList.add('active');
                 progress.style.width = '0%';
@@ -383,6 +617,7 @@
             uploadBtn.disabled = true;
             status.textContent = 'Uploading and processing PDF...';
             status.classList.remove('error', 'success');
+            summary.classList.remove('fade-in');
             window.simulateProgress();
 
             try {
@@ -398,6 +633,7 @@
 
                 extractedText = result.text;
                 summary.textContent = result.summary || 'No summary available.';
+                summary.classList.add('fade-in');
                 status.textContent = 'PDF processed successfully!';
                 status.classList.add('success');
                 status.classList.remove('error');
@@ -438,6 +674,7 @@
             questionBtn.disabled = true;
             status.textContent = 'Fetching answer...';
             status.classList.remove('error', 'success');
+            answer.classList.remove('fade-in');
 
             try {
                 const response = await fetch(`${API_BASE_URL}/api/ask`, {
@@ -452,6 +689,7 @@
                 }
 
                 answer.textContent = result.answer || 'No answer available.';
+                answer.classList.add('fade-in');
                 status.textContent = 'Question answered successfully!';
                 status.classList.add('success');
                 status.classList.remove('error');
