@@ -1,6 +1,6 @@
 # Pagify - AI-Powered PDF Summarizer & Query Tool
 
-![Pagify Preview](./images/pagify.webpimages/pagify)
+![Pagify Preview](./images/pagify.webp)
 
 **Pagify** is a web application that allows users to upload PDF documents, generate AI-powered summaries, ask questions about the content, and listen to responses in Indian English using text-to-speech (TTS). Built with the MERN stack (MongoDB, Express.js, React-free frontend, Node.js) and powered by OpenAI’s GPT-3.5-turbo, Pagify offers a seamless and accessible way to interact with PDFs.
 
