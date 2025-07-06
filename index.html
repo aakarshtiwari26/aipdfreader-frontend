@@ -6,11 +6,11 @@
     <title>Pagify - AI-Powered PDF Summarizer & Query Tool</title>
     <meta
       name="description"
-      content="Pagify: Upload PDFs, get AI-generated summaries, ask questions, and hear answers in Indian English. Built by Aakarsh Tiwari using MERN stack."
+      content="Pagify: Upload PDFs, get AI-generated summaries, ask questions, and hear answers in Indian English. Built by Aakarsh Tiwari using HTML, CSS, JavaScript, Node.js, Express, and MongoDB."
     />
     <meta
       name="keywords"
-      content="Pagify, AI PDF reader, PDF summarizer, document analysis, text-to-speech PDF, MERN stack, Aakarsh Tiwari, PDF query tool, Indian English TTS"
+      content="Pagify, AI PDF reader, PDF summarizer, document analysis, text-to-speech PDF, Node.js, Express, MongoDB, Aakarsh Tiwari, PDF query tool, Indian English TTS"
     />
     <meta name="author" content="Aakarsh Tiwari" />
     <meta name="robots" content="index, follow" />
@@ -54,6 +54,37 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/images/favicon-16x16.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/images/favicon-32x32.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/images/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/images/android-chrome-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/images/android-chrome-512x512.png"
+    />
+    <link rel="manifest" href="/images/site.webmanifest" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -121,13 +152,12 @@
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
       }
 
-      .header h1 {
-        font-size: clamp(1.8rem, 5vw, 3.5rem);
-        font-weight: 700;
-        color: #1a4d5f;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
+      .header .logo {
+        width: 200px;
+        height: 50px;
+        object-fit: contain;
         margin-bottom: 0.5rem;
+        display: inline-block;
       }
 
       .header p {
@@ -395,8 +425,9 @@
         .header {
           padding: 1.5rem 1rem;
         }
-        .header h1 {
-          font-size: clamp(1.5rem, 4vw, 2.2rem);
+        .header .logo {
+          width: 150px;
+          height: 40px;
         }
         .card {
           padding: 1.5rem;
@@ -424,8 +455,9 @@
       }
 
       @media (max-width: 480px) {
-        .header h1 {
-          font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+        .header .logo {
+          width: 120px;
+          height: 30px;
         }
         .header p {
           font-size: clamp(0.85rem, 2vw, 0.95rem);
@@ -463,8 +495,8 @@
   </head>
   <body>
     <header class="header">
-      <h1>Pagify</h1>
-      <p>Effortlessly Summarize, Query, and Listen to Your PDFs</p>
+      <img src="/images/pagify.webp" alt="Pagify Logo" class="logo" />
+      <p>Unlock Knowledge with AI-Powered PDF Insights</p>
     </header>
     <main class="container">
       <section id="upload-section" class="card">
@@ -542,7 +574,8 @@
           target="_blank"
           rel="noopener noreferrer"
           >Aakarsh Tiwari</a
-        >
+        ><br />
+        <q>Knowledge is power. Information is liberating.</q> — Kofi Annan
       </p>
     </footer>
     <script>
@@ -635,8 +668,7 @@
           button.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
         }
 
-        window.speechSynthesis.onvoiceschanged = () => {
-        };
+        window.speechSynthesis.onvoiceschanged = () => {};
 
         speakSummaryBtn.addEventListener("click", () => {
           const text = summaryText.textContent.trim();

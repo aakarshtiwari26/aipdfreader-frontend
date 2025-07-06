@@ -152,11 +152,11 @@ Contributions are welcome! To contribute:
 4. Push to the branch (`git push origin feature/your-feature`).
 5. Open a Pull Request with a clear description.
 
-Please follow the [Code of Conduct](CODE_OF_CONDUCT.md) and ensure code adheres to ESLint rules (for backend) and Prettier formatting.
+Please follow the Code of Conduct and ensure code adheres to ESLint rules (for backend) and Prettier formatting.
 
 ## License
 
-[MIT License](LICENSE) © 2025 Aakarsh Tiwari
+© 2025 Aakarsh Tiwari
 
 ## Contact
 
