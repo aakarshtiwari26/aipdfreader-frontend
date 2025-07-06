@@ -43,8 +43,8 @@ To run Pagify locally, ensure you have:
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/aakarshtiwari26/aipdfreader-three.git
-   cd aipdfreader-three
+   git clone https://github.com/aakarshtiwari26/aipdfreader-frontend.git
+   cd aipdfreader-frontend
    ```
 
 2. **Backend Setup**:
@@ -134,12 +134,12 @@ To run Pagify locally, ensure you have:
   4. Deploy to get a public URL (e.g., `https://your-backend.onrender.com`).
 
 - **SEO**:
-  - Submit `https://reader.aakarshtiwari.com/sitemap.xml` to Google Search Console.
+  - Submit `https://<your-url>/sitemap.xml` to Google Search Console.
   - Ensure `robots.txt` allows crawling:
     ```
     User-agent: *
     Allow: /
-    Sitemap: https://reader.aakarshtiwari.com/sitemap.xml
+    Sitemap: https://<your-url>/sitemap.xml
     ```
 
 ## Contributing
