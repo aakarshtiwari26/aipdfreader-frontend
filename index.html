@@ -14,7 +14,7 @@
     />
     <meta name="author" content="Aakarsh Tiwari" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://reader.aakarshtiwari.com" />
+    <link rel="canonical" href="https://pagify.aakarshtiwari.com" />
     <meta
       property="og:title"
       content="Pagify - AI-Powered PDF Summarizer & Query Tool"
@@ -23,11 +23,11 @@
       property="og:description"
       content="Upload PDFs, get concise summaries, ask questions, and hear answers with Pagify's AI and text-to-speech in Indian English."
     />
-    <meta property="og:url" content="https://reader.aakarshtiwari.com" />
+    <meta property="og:url" content="https://pagify.aakarshtiwari.com" />
     <meta property="og:type" content="website" />
     <meta
       property="og:image"
-      content="https://reader.aakarshtiwari.com/images/pagify-preview.png"
+      content="https://pagify.aakarshtiwari.com/images/pagify-preview.png"
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta
@@ -40,7 +40,7 @@
     />
     <meta
       name="twitter:image"
-      content="https://reader.aakarshtiwari.com/images/pagify-preview.png"
+      content="https://pagify.aakarshtiwari.com/images/pagify-preview.png"
     />
     <meta name="twitter:site" content="@aakarshtiwari08" />
     <link
@@ -59,7 +59,7 @@
         "@context": "https://schema.org",
         "@type": "WebApplication",
         "name": "Pagify",
-        "url": "https://reader.aakarshtiwari.com",
+        "url": "https://pagify.aakarshtiwari.com",
         "description": "Pagify is an AI-powered web app for uploading PDFs, generating summaries, querying content, and listening to answers in Indian English using text-to-speech.",
         "applicationCategory": "Productivity",
         "operatingSystem": "Web",
@@ -79,7 +79,7 @@
         "@context": "https://schema.org",
         "@type": "WebPage",
         "name": "Pagify - AI PDF Summarizer",
-        "url": "https://reader.aakarshtiwari.com",
+        "url": "https://pagify.aakarshtiwari.com",
         "description": "Pagify lets you upload PDFs, get AI-generated summaries, ask questions, and hear answers in Indian English. Built by Aakarsh Tiwari.",
         "mainEntity": {
           "@type": "WebApplication",
@@ -636,6 +636,7 @@
         }
 
         window.speechSynthesis.onvoiceschanged = () => {
+          // Ensure voices are loaded
         };
 
         speakSummaryBtn.addEventListener("click", () => {
