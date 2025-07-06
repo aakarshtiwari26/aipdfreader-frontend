@@ -70,6 +70,7 @@
             margin-bottom: 3.5rem;
             box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.05), -8px -8px 16px rgba(255, 255, 255, 0.8);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
         }
 
         .card:hover {
@@ -180,7 +181,6 @@
             min-height: 180px;
             line-height: 1.8;
             transition: transform 0.3s ease;
-            position: relative;
         }
 
         .content.slide-in {
@@ -193,9 +193,6 @@
         }
 
         .speak-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
             background: #1a4d5f;
             color: #ffffff;
             border: none;
@@ -208,6 +205,7 @@
             justify-content: center;
             width: 40px;
             height: 40px;
+            margin: 0.5rem 0;
         }
 
         .speak-btn:hover:not(:disabled) {
@@ -222,6 +220,11 @@
 
         .speak-btn i {
             font-size: 1.2rem;
+        }
+
+        .content-container {
+            position: relative;
+            margin-top: 1rem;
         }
 
         .status {
@@ -383,11 +386,11 @@
         
         <section id="summary-section" class="card">
             <h2><i class="fas fa-file-alt"></i> Summary</h2>
-            <div id="summary" class="content">
-                Upload a PDF to see its summary.
-                <button id="speakSummaryBtn" class="speak-btn" disabled title="Speak Summary">
-                    <i class="fas fa-volume-up"></i>
-                </button>
+            <button id="speakSummaryBtn" class="speak-btn" disabled title="Speak Summary">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <div class="content-container">
+                <div id="summaryText" class="content">Upload a PDF to see its summary.</div>
             </div>
         </section>
         
@@ -397,11 +400,11 @@
                 <input type="text" id="questionInput" placeholder="Ask about the PDF content...">
                 <button id="questionBtn" onclick="askQuestion()" disabled>Submit</button>
             </div>
-            <div id="answer" class="content">
-                Answers will appear here.
-                <button id="speakAnswerBtn" class="speak-btn" disabled title="Speak Answer">
-                    <i class="fas fa-volume-up"></i>
-                </button>
+            <button id="speakAnswerBtn" class="speak-btn" disabled title="Speak Answer">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <div class="content-container">
+                <div id="answerText" class="content">Answers will appear here.</div>
             </div>
             <div id="qaStatus" class="status"></div>
         </section>
@@ -423,8 +426,8 @@
             const pdfInput = document.getElementById('pdfInput');
             const uploadBtn = document.getElementById('uploadBtn');
             const progressCircle = document.getElementById('progressCircle');
-            const summary = document.getElementById('summary');
-            const answer = document.getElementById('answer');
+            const summaryText = document.getElementById('summaryText');
+            const answerText = document.getElementById('answerText');
             const speakSummaryBtn = document.getElementById('speakSummaryBtn');
             const speakAnswerBtn = document.getElementById('speakAnswerBtn');
 
@@ -500,14 +503,14 @@
             };
 
             speakSummaryBtn.addEventListener('click', () => {
-                const text = summary.textContent.trim();
+                const text = summaryText.textContent.trim();
                 if (text && text !== 'Upload a PDF to see its summary.') {
                     speakText(text, speakSummaryBtn);
                 }
             });
 
             speakAnswerBtn.addEventListener('click', () => {
-                const text = answer.textContent.trim();
+                const text = answerText.textContent.trim();
                 if (text && text !== 'Answers will appear here.') {
                     speakText(text, speakAnswerBtn);
                 }
@@ -520,7 +523,7 @@
             const pdfInput = document.getElementById('pdfInput');
             const uploadBtn = document.getElementById('uploadBtn');
             const status = document.getElementById('uploadStatus');
-            const summary = document.getElementById('summary');
+            const summaryText = document.getElementById('summaryText');
             const speakSummaryBtn = document.getElementById('speakSummaryBtn');
 
             if (!pdfInput.files[0]) {
@@ -543,7 +546,7 @@
             uploadBtn.disabled = true;
             status.textContent = 'Uploading and processing PDF...';
             status.classList.remove('error', 'success');
-            summary.classList.remove('slide-in');
+            summaryText.classList.remove('slide-in');
             window.simulateProgress();
 
             try {
@@ -559,8 +562,8 @@
                 }
 
                 extractedText = result.text;
-                summary.textContent = result.summary || 'No summary available.';
-                summary.classList.add('slide-in');
+                summaryText.textContent = result.summary || 'No summary available.';
+                summaryText.classList.add('slide-in');
                 status.textContent = 'PDF processed successfully!';
                 status.classList.add('success');
                 status.classList.remove('error');
@@ -583,7 +586,7 @@
             const questionInput = document.getElementById('questionInput');
             const questionBtn = document.getElementById('questionBtn');
             const status = document.getElementById('qaStatus');
-            const answer = document.getElementById('answer');
+            const answerText = document.getElementById('answerText');
             const speakAnswerBtn = document.getElementById('speakAnswerBtn');
             const question = questionInput.value.trim();
 
@@ -604,7 +607,7 @@
             questionBtn.disabled = true;
             status.textContent = 'Fetching answer...';
             status.classList.remove('error', 'success');
-            answer.classList.remove('slide-in');
+            answerText.classList.remove('slide-in');
 
             try {
                 const response = await fetch('/api/ask', {
@@ -619,8 +622,8 @@
                     throw new Error(result.error || `HTTP error! Status: ${response.status}`);
                 }
 
-                answer.textContent = result.answer || 'No answer available.';
-                answer.classList.add('slide-in');
+                answerText.textContent = result.answer || 'No answer available.';
+                answerText.classList.add('slide-in');
                 status.textContent = 'Question answered successfully!';
                 status.classList.add('success');
                 status.classList.remove('error');
