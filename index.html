@@ -583,6 +583,8 @@
       </p>
     </footer>
     <script>
+      const API_BASE = "/api"; // Automatically proxies to backend via vercel.json
+
       let extractedText = "";
       let isSpeaking = false;
       let currentUtterance = null;
@@ -722,7 +724,7 @@
         window.simulateProgress();
 
         try {
-          const response = await fetch("/api/upload", {
+          const response = await fetch(`${API_BASE}/upload`, {
             method: "POST",
             body: formData,
             credentials: "include",
@@ -784,7 +786,7 @@
         answerText.classList.remove("slide-in");
 
         try {
-          const response = await fetch("/api/ask", {
+          const response = await fetch(`${API_BASE}/ask`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ question, context: extractedText }),
