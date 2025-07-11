@@ -728,12 +728,13 @@
             credentials: "include",
           });
 
+          const raw = await response.text(); // read only once
           let result;
+
           try {
-            result = await response.json();
-          } catch (jsonError) {
-            const text = await response.text();
-            throw new Error(text || "Invalid JSON response from server.");
+            result = JSON.parse(raw);
+          } catch {
+            throw new Error(raw); // not valid JSON, show raw error
           }
 
           if (!response.ok) {
