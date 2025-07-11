@@ -728,15 +728,7 @@
             credentials: "include",
           });
 
-          const raw = await response.text(); // read only once
-          let result;
-
-          try {
-            result = JSON.parse(raw);
-          } catch {
-            throw new Error(raw); // not valid JSON, show raw error
-          }
-
+          const result = await response.json();
           if (!response.ok) {
             throw new Error(
               result.error || `HTTP error! Status: ${response.status}`
