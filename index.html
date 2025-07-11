@@ -583,7 +583,7 @@
       </p>
     </footer>
     <script>
-      const API_BASE = "/api"; // Automatically proxies to backend via vercel.json
+      const API_BASE = "/api";
 
       let extractedText = "";
       let isSpeaking = false;
@@ -730,7 +730,18 @@
             credentials: "include",
           });
 
-          const result = await response.json();
+          let result;
+          const isJSON = response.headers
+            .get("content-type")
+            ?.includes("application/json");
+
+          if (isJSON) {
+            result = await response.json();
+          } else {
+            const text = await response.text();
+            throw new Error(`Non-JSON error: ${text}`);
+          }
+
           if (!response.ok) {
             throw new Error(
               result.error || `HTTP error! Status: ${response.status}`
@@ -793,7 +804,18 @@
             credentials: "include",
           });
 
-          const result = await response.json();
+          let result;
+          const isJSON = response.headers
+            .get("content-type")
+            ?.includes("application/json");
+
+          if (isJSON) {
+            result = await response.json();
+          } else {
+            const text = await response.text();
+            throw new Error(`Non-JSON error: ${text}`);
+          }
+
           if (!response.ok) {
             throw new Error(
               result.error || `HTTP error! Status: ${response.status}`
