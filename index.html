@@ -692,76 +692,71 @@
       });
 
       async function uploadPDF() {
-        const pdfInput = document.getElementById("pdfInput");
-        const uploadBtn = document.getElementById("uploadBtn");
-        const status = document.getElementById("uploadStatus");
-        const summaryText = document.getElementById("summaryText");
-        const speakSummaryBtn = document.getElementById("speakSummaryBtn");
+  const pdfInput = document.getElementById("pdfInput");
+  const uploadBtn = document.getElementById("uploadBtn");
+  const status = document.getElementById("uploadStatus");
+  const summaryText = document.getElementById("summaryText");
+  const speakSummaryBtn = document.getElementById("speakSummaryBtn");
 
-        if (!pdfInput.files[0]) {
-          status.textContent = "Please select a PDF file.";
-          status.classList.add("error");
-          status.classList.remove("success");
-          return;
-        }
+  if (!pdfInput.files[0]) {
+    status.textContent = "Please select a PDF file.";
+    status.classList.add("error");
+    return;
+  }
 
-        if (pdfInput.files[0].size > 10 * 1024 * 1024) {
-          status.textContent = "File size exceeds 10MB limit.";
-          status.classList.add("error");
-          status.classList.remove("success");
-          return;
-        }
+  if (pdfInput.files[0].size > 10 * 1024 * 1024) {
+    status.textContent = "File size exceeds 10MB limit.";
+    status.classList.add("error");
+    return;
+  }
 
-        const formData = new FormData();
-        formData.append("pdf", pdfInput.files[0]);
+  const formData = new FormData();
+  formData.append("pdf", pdfInput.files[0]);
 
-        uploadBtn.disabled = true;
-        status.textContent = "Uploading and processing PDF...";
-        status.classList.remove("error", "success");
-        summaryText.classList.remove("slide-in");
-        window.simulateProgress();
+  uploadBtn.disabled = true;
+  status.textContent = "Uploading and processing PDF...";
+  status.classList.remove("error", "success");
+  summaryText.classList.remove("slide-in");
+  window.simulateProgress();
 
-        try {
-          const response = await fetch("/api/upload", {
-            method: "POST",
-            body: formData,
-            credentials: "include",
-          });
+  try {
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
 
-          let result;
-          try {
-            result = await response.json();
-          } catch (e) {
-            const fallback = await response.text();
-            throw new Error(`Invalid JSON response: ${fallback}`);
-          }
+    let result = null;
+    try {
+      result = await response.clone().json(); // ✅ clone before reading JSON
+    } catch {
+      const fallbackText = await response.text();
+      throw new Error(`Server error: ${fallbackText}`);
+    }
 
-          if (!response.ok) {
-            throw new Error(
-              result.error || `HTTP error! Status: ${response.status}`
-            );
-          }
+    if (!response.ok) {
+      throw new Error(result.error || `HTTP ${response.status}`);
+    }
 
-          extractedText = result.text;
-          summaryText.textContent = result.summary || "No summary available.";
-          summaryText.classList.add("slide-in");
-          status.textContent = "PDF processed successfully!";
-          status.classList.add("success");
-          status.classList.remove("error");
-          document.getElementById("questionBtn").disabled = false;
-          speakSummaryBtn.disabled = false;
-          pdfInput.value = "";
-          uploadBtn.disabled = true;
-        } catch (error) {
-          console.error("Upload error:", error);
-          status.textContent = `Error: ${error.message}`;
-          status.classList.add("error");
-          status.classList.remove("success");
-          speakSummaryBtn.disabled = true;
-        } finally {
-          uploadBtn.disabled = !pdfInput.files[0];
-        }
-      }
+    extractedText = result.text;
+    summaryText.textContent = result.summary || "No summary available.";
+    summaryText.classList.add("slide-in");
+    status.textContent = "PDF processed successfully!";
+    status.classList.add("success");
+    document.getElementById("questionBtn").disabled = false;
+    speakSummaryBtn.disabled = false;
+    pdfInput.value = "";
+    uploadBtn.disabled = true;
+  } catch (error) {
+    console.error("Upload error:", error.message);
+    status.textContent = `Error: ${error.message}`;
+    status.classList.add("error");
+    speakSummaryBtn.disabled = true;
+  } finally {
+    uploadBtn.disabled = !pdfInput.files[0];
+  }
+}
+
 
       async function askQuestion() {
         const questionInput = document.getElementById("questionInput");
