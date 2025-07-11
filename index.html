@@ -583,8 +583,6 @@
       </p>
     </footer>
     <script>
-      const API_BASE = "/api";
-
       let extractedText = "";
       let isSpeaking = false;
       let currentUtterance = null;
@@ -724,24 +722,13 @@
         window.simulateProgress();
 
         try {
-          const response = await fetch(`${API_BASE}/upload`, {
+          const response = await fetch("/api/upload", {
             method: "POST",
             body: formData,
             credentials: "include",
           });
 
-          let result;
-          const isJSON = response.headers
-            .get("content-type")
-            ?.includes("application/json");
-
-          if (isJSON) {
-            result = await response.json();
-          } else {
-            const text = await response.text();
-            throw new Error(`Non-JSON error: ${text}`);
-          }
-
+          const result = await response.json();
           if (!response.ok) {
             throw new Error(
               result.error || `HTTP error! Status: ${response.status}`
@@ -797,25 +784,14 @@
         answerText.classList.remove("slide-in");
 
         try {
-          const response = await fetch(`${API_BASE}/ask`, {
+          const response = await fetch("/api/ask", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ question, context: extractedText }),
             credentials: "include",
           });
 
-          let result;
-          const isJSON = response.headers
-            .get("content-type")
-            ?.includes("application/json");
-
-          if (isJSON) {
-            result = await response.json();
-          } else {
-            const text = await response.text();
-            throw new Error(`Non-JSON error: ${text}`);
-          }
-
+          const result = await response.json();
           if (!response.ok) {
             throw new Error(
               result.error || `HTTP error! Status: ${response.status}`
