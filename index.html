@@ -728,7 +728,14 @@
             credentials: "include",
           });
 
-          const result = await response.json();
+          let result;
+          try {
+            result = await response.json();
+          } catch (e) {
+            const fallback = await response.text();
+            throw new Error(`Invalid JSON response: ${fallback}`);
+          }
+
           if (!response.ok) {
             throw new Error(
               result.error || `HTTP error! Status: ${response.status}`
