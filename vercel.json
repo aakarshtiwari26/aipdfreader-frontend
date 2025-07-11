@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://aipdfreader-0f7m.onrender.com/api/$1"
+      "destination": "https://aipdfreader-backend.vercel.app/api/$1"
     },
     {
       "source": "/(.*)",
