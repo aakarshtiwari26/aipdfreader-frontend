@@ -173,7 +173,6 @@ To run Pagify locally, ensure you have:
   2. Create a new Web Service on Render, linking to the repo.
   3. Set environment variables in Render’s dashboard:
      ```text
-     PORT=10000
      MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.efuj1.mongodb.net/<dbname>?retryWrites=true&w=majority
      OPENAI_API_KEY=sk-proj-<your-key>
      FRONTEND_URL=https://pagify.aakarshtiwari.com
