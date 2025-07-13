@@ -48,7 +48,7 @@ To run Pagify locally, ensure you have:
 
    ```bash
    git clone https://github.com/aakarshtiwari26/aipdfreader-frontend.git
-   cd aipdfreader-three
+   cd aipdfreader-frontend
    ```
 
 2. **Backend Setup**:
@@ -78,7 +78,7 @@ To run Pagify locally, ensure you have:
 
    - Return to the frontend directory:
      ```bash
-     cd ../aipdfreader-three
+     cd ../aipdfreader-frontend
      ```
    - Move files to `public/`:
      ```bash
@@ -126,7 +126,7 @@ To run Pagify locally, ensure you have:
 
 - **Frontend (Vercel)**:
 
-  1. Push the frontend code to a GitHub repository (`aakarshtiwari26/aipdfreader-three`).
+  1. Push the frontend code to a GitHub repository (`aakarshtiwari26/aipdfreader-frontend`).
   2. Connect the repo to Vercel via the Vercel dashboard.
   3. Configure `vercel.json` to proxy `/api/*` requests and serve static files correctly:
      ```json
