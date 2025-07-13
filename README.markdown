@@ -64,7 +64,7 @@ To run Pagify locally, ensure you have:
      ```
    - Create a `.env` file in the `backend` directory:
      ```text
-     MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.efuj1.mongodb.net/adobe?retryWrites=true&w=majority
+     MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.efuj1.mongodb.net/<dbname>?retryWrites=true&w=majority
      OPENAI_API_KEY=sk-proj-<your-key>
      FRONTEND_URL=https://pagify.aakarshtiwari.com
      ```
