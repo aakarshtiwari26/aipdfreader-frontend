@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Pagify - AI-Powered PDF Summarizer and Query Tool by Aakarsh Tiwari." />
+  <title>Pagify Documentation</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <main class="container">
+    <h1>📄 Pagify</h1>
+    <p class="tagline">AI-Powered PDF Summarizer & Query Tool</p>
+    <img src="./images/pagify.webp" alt="Pagify Preview" class="banner" />
+    <blockquote>"Education is the manifestation of the perfection already in man." — Swami Vivekananda</blockquote>
+
+    <section>
+      <h2>🚀 Live Demo</h2>
+      <p>Try it here: <a href="https://pagify.aakarshtiwari.com" target="_blank">pagify.aakarshtiwari.com</a></p>
+    </section>
+
+    <section>
+      <h2>📦 Features</h2>
+      <ul>
+        <li>PDF Upload (up to 5MB, 10 pages)</li>
+        <li>AI Summarization using GPT-3.5-turbo</li>
+        <li>Ask Questions about the PDF</li>
+        <li>Text-to-Speech in Indian English (en-IN)</li>
+        <li>Responsive UI, Accessibility, SEO</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>🛠️ Tech Stack</h2>
+      <ul>
+        <li><strong>Frontend:</strong> HTML, CSS, JS (Vanilla), Font Awesome</li>
+        <li><strong>Backend:</strong> Node.js, Express.js</li>
+        <li><strong>Database:</strong> MongoDB (Mongoose)</li>
+        <li><strong>AI:</strong> OpenAI GPT-3.5-turbo</li>
+        <li><strong>TTS:</strong> Web Speech API (en-IN)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>📥 Installation</h2>
+
+      <h3>Frontend</h3>
+      <pre><code class="language-bash">git clone https://github.com/aakarshtiwari26/aipdfreader-frontend.git
+cd aipdfreader-frontend</code></pre>
+
+      <h3>Backend</h3>
+      <pre><code class="language-bash">git clone https://github.com/aakarshtiwari26/aipdfreader-backend.git
+cd aipdfreader-backend
+npm install</code></pre>
+
+      <h3>.env Example</h3>
+      <pre><code class="language-env">MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/<dbname>
+OPENAI_API_KEY=sk-<your-key>
+FRONTEND_URL=https://pagify.aakarshtiwari.com</code></pre>
+
+      <h3>Run Server</h3>
+      <pre><code class="language-bash">npm run dev</code></pre>
+    </section>
+
+    <section>
+      <h2>🌐 Deployment</h2>
+
+      <h3>Vercel (Frontend)</h3>
+      <pre><code class="language-json">{
+  "version": 2,
+  "builds": [
+    { "src": "public/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "https://aipdfreader-0f7m.onrender.com/api/$1"
+    }
+  ]
+}</code></pre>
+
+      <h3>Render (Backend)</h3>
+      <pre><code class="language-env">MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/<db>
+OPENAI_API_KEY=sk-<key>
+FRONTEND_URL=https://pagify.aakarshtiwari.com</code></pre>
+    </section>
+
+    <section>
+      <h2>🧠 Usage</h2>
+      <ul>
+        <li>Upload PDF → See summary</li>
+        <li>Ask questions → Get AI responses</li>
+        <li>Click speaker icon → TTS in Indian English</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>🔥 Performance</h2>
+      <p>Pagify uses health checks and UptimeRobot to reduce cold start time on Render.</p>
+      <pre><code class="language-js">const preWarm = async () =&gt; {
+  try {
+    const res = await fetch("https://aipdfreader-0f7m.onrender.com/health");
+    console.log("Pre-warm:", res.ok);
+  } catch (err) {
+    console.error("Pre-warm error:", err.message);
+  }
+};</code></pre>
+    </section>
+
+    <section>
+      <h2>🙌 Contributing</h2>
+      <pre><code class="language-bash">git checkout -b feature/your-feature
+git commit -m "Add your feature"
+git push origin feature/your-feature</code></pre>
+      <p>Then open a Pull Request. Follow ESLint + Prettier formatting.</p>
+    </section>
+
+    <section>
+      <h2>📄 License</h2>
+      <p>MIT License © 2025 Aakarsh Tiwari</p>
+    </section>
+
+    <section>
+      <h2>📬 Contact</h2>
+      <ul>
+        <li>LinkedIn: <a href="https://linkedin.com/in/aakarshtiwari">aakarshtiwari</a></li>
+        <li>GitHub: <a href="https://github.com/aakarshtiwari26">aakarshtiwari26</a></li>
+        <li>Twitter: <a href="https://twitter.com/aakarshtiwari08">@aakarshtiwari08</a></li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

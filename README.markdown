@@ -174,7 +174,7 @@ To run Pagify locally, ensure you have:
   3. Set environment variables in Render’s dashboard:
      ```text
      MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.efuj1.mongodb.net/<dbname>?retryWrites=true&w=majority
-     OPENAI_API_KEY=sk-proj-<your-key>
+     OPENAI_API_KEY=<your-key>
      FRONTEND_URL=https://pagify.aakarshtiwari.com
      ```
   4. Deploy to get a public URL: `https://aipdfreader-0f7m.onrender.com`.
