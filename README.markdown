@@ -185,7 +185,7 @@ To run Pagify locally, ensure you have:
     ```text
     User-agent: *
     Allow: /
-    Sitemap: https://pagify.aakarshtiwari.com/sitemap.xml
+    Sitemap: https://pagify.aakarshtiwari.com/sitemap.xmls
     ```
 
 ## Performance Optimization
