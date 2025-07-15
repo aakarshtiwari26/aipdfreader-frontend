@@ -681,19 +681,27 @@
       };
       let voices = [];
 
-      // Preload voices synchronously
+      // Robust voice initialization
       function preloadVoices() {
         voices = window.speechSynthesis.getVoices();
         if (!voices.length) {
-          window.speechSynthesis.getVoices();
-          window.speechSynthesis.getVoices();
-          setTimeout(() => {
+          console.log("TTS: Initial voices empty, retrying...");
+          let attempts = 0;
+          const maxAttempts = 3;
+          const retryInterval = setInterval(() => {
             voices = window.speechSynthesis.getVoices();
-            console.log(
-              "TTS: Voices preloaded",
-              voices.map((v) => v.lang)
-            );
-          }, 0);
+            if (voices.length || attempts >= maxAttempts) {
+              clearInterval(retryInterval);
+              console.log(
+                voices.length
+                  ? `TTS: Voices loaded after ${
+                      attempts + 1
+                    } attempts: ${voices.map((v) => v.lang)}`
+                  : "TTS: Failed to load voices after max attempts"
+              );
+            }
+            attempts++;
+          }, 100);
         } else {
           console.log(
             "TTS: Voices preloaded",
@@ -898,7 +906,8 @@
           if (!voices.length) {
             voices = window.speechSynthesis.getVoices();
             if (!voices.length) {
-              console.error("TTS: No voices available");
+              console.error("TTS: No voices available, retrying...");
+              preloadVoices();
               return;
             }
           }
@@ -910,7 +919,8 @@
             voices.find((voice) => voice.lang === "en-US") ||
             voices[0];
           if (!indianVoice) {
-            console.log("TTS: No suitable voice found");
+            console.error("TTS: No suitable voice found");
+            resetSpeechState();
             return;
           }
           utterance.voice = indianVoice;
@@ -963,7 +973,7 @@
         let lastClickTime = 0;
         sectionList.addEventListener("click", (e) => {
           const currentTime = performance.now();
-          if (currentTime - lastClickTime < 100) return; // Debounce 100ms
+          if (currentTime - lastClickTime < 50) return; // Debounce 50ms
           lastClickTime = currentTime;
 
           const btn = e.target.closest(".speak-section-btn");
@@ -973,18 +983,24 @@
               .querySelector(`#section-summary-${index}`)
               ?.textContent.trim();
             if (text) {
-              console.log("TTS: Triggered for section", index);
+              console.log(
+                "TTS: Triggered for section",
+                index,
+                text.substring(0, 50) + (text.length > 50 ? "..." : "")
+              );
               speakText(text, btn);
             } else {
               console.log("TTS: No summary text for section", index);
             }
+          } else {
+            console.log("TTS: No section button clicked");
           }
         });
 
         window.simulateProgress = simulateProgress;
         window.speakAnswer = (button) => {
           const currentTime = performance.now();
-          if (currentTime - lastClickTime < 100) return; // Debounce 100ms
+          if (currentTime - lastClickTime < 50) return; // Debounce 50ms
           lastClickTime = currentTime;
 
           const text = answerText.textContent.trim();
