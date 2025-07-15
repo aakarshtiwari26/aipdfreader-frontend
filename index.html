@@ -613,7 +613,9 @@
       </section>
 
       <section id="structure-section" class="card">
-        <h2><i class="fas fa-sitemap" aria-hidden="true"></i> Document Structure</h2>
+        <h2>
+          <i class="fas fa-sitemap" aria-hidden="true"></i> Document Structure
+        </h2>
         <ul id="sectionList" class="section-list">
           <li>Upload a PDF to see its structure.</li>
         </ul>
@@ -656,8 +658,15 @@
     <footer>
       <p>
         © 2025 Pagify. All rights reserved.<br />
-        <q>Education is the manifestation of the perfection already in man.</q> — Swami Vivekananda<br />
-        Designed & Developed by <a href="https://www.linkedin.com/in/aakarshtiwari/" target="_blank" rel="noopener noreferrer">Aakarsh Tiwari</a>
+        <q>Education is the manifestation of the perfection already in man.</q>
+        — Swami Vivekananda<br />
+        Designed & Developed by
+        <a
+          href="https://www.linkedin.com/in/aakarshtiwari/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Aakarsh Tiwari</a
+        >
       </p>
     </footer>
     <script>
@@ -677,12 +686,17 @@
 
           const tryLoad = () => {
             voices = window.speechSynthesis.getVoices();
-            console.log("TTS: Voices loaded", voices.map(v => v.lang));
+            console.log(
+              "TTS: Voices loaded",
+              voices.map((v) => v.lang)
+            );
             if (voices.length) {
               resolve(voices);
             } else if (retries < maxRetries) {
               retries++;
-              console.log(`TTS: No voices, retrying (${retries}/${maxRetries})...`);
+              console.log(
+                `TTS: No voices, retrying (${retries}/${maxRetries})...`
+              );
               setTimeout(tryLoad, retryInterval);
             } else {
               console.error("TTS: Failed to load voices after max retries");
@@ -697,10 +711,10 @@
 
       // Initialize voices on page load
       document.addEventListener("DOMContentLoaded", () => {
-        loadVoices().catch(err => console.error("TTS: Voice load error", err));
-      });
+        loadVoices().catch((err) =>
+          console.error("TTS: Voice load error", err)
+        );
 
-      document.addEventListener("DOMContentLoaded", () => {
         const uploadArea = document.getElementById("uploadArea");
         const pdfInput = document.getElementById("pdfInput");
         const uploadBtn = document.getElementById("uploadBtn");
@@ -708,14 +722,14 @@
         const sectionList = document.getElementById("sectionList");
         const sectionSelect = document.getElementById("sectionSelect");
         const answerText = document.getElementById("answerText");
-        const speakAnswerBtn = document.getElementById("speakAnswerBtn");
         const questionInput = document.getElementById("questionInput");
 
         // Reset all speaker buttons' state
         function resetAllSpeakButtons() {
-          document.querySelectorAll(".speak-btn").forEach(btn => {
+          document.querySelectorAll(".speak-btn").forEach((btn) => {
             btn.classList.remove("paused");
-            btn.innerHTML = '<i class="fas fa-volume-up" aria-hidden="true"></i>';
+            btn.innerHTML =
+              '<i class="fas fa-volume-up" aria-hidden="true"></i>';
           });
         }
 
@@ -754,7 +768,10 @@
         });
 
         questionInput.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" && !document.getElementById("questionBtn").disabled) {
+          if (
+            e.key === "Enter" &&
+            !document.getElementById("questionBtn").disabled
+          ) {
             console.log("Enter key pressed, triggering askQuestion");
             askQuestion();
           }
@@ -791,7 +808,8 @@
               isPaused = false;
               isSpeaking = true;
               button.classList.remove("paused");
-              button.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
+              button.innerHTML =
+                '<i class="fas fa-pause" aria-hidden="true"></i>';
               return;
             } else if (isSpeaking) {
               console.log("TTS: Pausing speech");
@@ -799,7 +817,8 @@
               isPaused = true;
               isSpeaking = false;
               button.classList.add("paused");
-              button.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
+              button.innerHTML =
+                '<i class="fas fa-play" aria-hidden="true"></i>';
               return;
             }
           }
@@ -834,7 +853,8 @@
             isPaused = false;
             activeButton = button;
             button.classList.remove("paused");
-            button.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
+            button.innerHTML =
+              '<i class="fas fa-pause" aria-hidden="true"></i>';
           };
           utterance.onend = () => {
             console.log("TTS: Speaking ended");
@@ -861,9 +881,9 @@
         sectionList.addEventListener("click", async (e) => {
           if (e.target.classList.contains("speak-section-btn")) {
             const index = e.target.dataset.index;
-            const text = sectionList.querySelector(
-              `#section-summary-${index}`
-            )?.textContent.trim();
+            const text = sectionList
+              .querySelector(`#section-summary-${index}`)
+              ?.textContent.trim();
             if (text) {
               console.log("TTS: Triggered for section", index);
               await speakText(text, e.target);
@@ -874,11 +894,11 @@
         });
 
         window.simulateProgress = simulateProgress;
-        window.speakAnswer = async () => {
+        window.speakAnswer = async (button) => {
           const text = answerText.textContent.trim();
           if (text && text !== "Answers will appear here.") {
             console.log("TTS: Triggered for answer");
-            await speakText(text, speakAnswerBtn);
+            await speakText(text, button);
           } else {
             console.log("TTS: No answer text to speak");
           }
@@ -916,11 +936,14 @@
         window.simulateProgress();
 
         try {
-          const response = await fetch("https://aipdfreader-0f7m.onrender.com/api/upload", {
-            method: "POST",
-            body: formData,
-            credentials: "include",
-          });
+          const response = await fetch(
+            "https://aipdfreader-0f7m.onrender.com/api/upload",
+            {
+              method: "POST",
+              body: formData,
+              credentials: "include",
+            }
+          );
 
           const result = await response.json();
           if (!response.ok) {
@@ -929,7 +952,10 @@
             );
           }
 
-          extractedData = { text: result.text || "", sections: Array.isArray(result.sections) ? result.sections : [] };
+          extractedData = {
+            text: result.text || "",
+            sections: Array.isArray(result.sections) ? result.sections : [],
+          };
           sectionList.innerHTML = extractedData.sections.length
             ? ""
             : "<li>No sections detected. Showing full document.</li>";
@@ -942,22 +968,24 @@
               li.className = "section-item";
               li.id = `section-${index}`;
               li.innerHTML = `
-                <h3>${section.heading || "Untitled Section"}</h3>
-                <p id="section-summary-${index}">${section.summary || "No summary available."}</p>
-                <button class="speak-btn speak-section-btn" data-index="${index}" title="Speak section summary">
-                  <i class="fas fa-volume-up" aria-hidden="true"></i>
-                </button>
-                <p>Related: ${
-                  section.related && section.related.length
-                    ? section.related
-                        .map(
-                          (rel) =>
-                            `<a href="#section-${rel.index}" onclick="scrollToSection(${rel.index})">${rel.heading}</a>`
-                        )
-                        .join(", ")
-                    : "None"
-                }</p>
-              `;
+          <h3>${section.heading || "Untitled Section"}</h3>
+          <p id="section-summary-${index}">${
+                section.summary || "No summary available."
+              }</p>
+          <button class="speak-btn speak-section-btn" data-index="${index}" title="Speak section summary">
+            <i class="fas fa-volume-up" aria-hidden="true"></i>
+          </button>
+          <p>Related: ${
+            section.related && section.related.length
+              ? section.related
+                  .map(
+                    (rel) =>
+                      `<a href="#section-${rel.index}" onclick="scrollToSection(${rel.index})">${rel.heading}</a>`
+                  )
+                  .join(", ")
+              : "None"
+          }</p>
+        `;
               sectionList.appendChild(li);
 
               const option = document.createElement("option");
@@ -1001,7 +1029,7 @@
         const questionBtn = document.getElementById("questionBtn");
         const status = document.getElementById("qaStatus");
         const answerText = document.getElementById("answerText");
-        const speakAnswerBtn = document.getElementById("speakAnswerBtn");
+        const contentContainer = document.querySelector(".content-container");
         const sectionSelect = document.getElementById("sectionSelect");
         const question = questionInput.value.trim();
         const sectionIndex = sectionSelect.value;
@@ -1026,12 +1054,19 @@
         answerText.classList.remove("slide-in");
 
         try {
-          const response = await fetch("https://aipdfreader-0f7m.onrender.com/api/ask", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question, context: extractedData, sectionIndex }),
-            credentials: "include",
-          });
+          const response = await fetch(
+            "https://aipdfreader-0f7m.onrender.com/api/ask",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                question,
+                context: extractedData,
+                sectionIndex,
+              }),
+              credentials: "include",
+            }
+          );
 
           const result = await response.json();
           if (!response.ok) {
@@ -1045,6 +1080,19 @@
           status.textContent = "Question answered successfully!";
           status.classList.add("success");
           status.classList.remove("error");
+
+          // Add or update speak button for answer
+          let speakAnswerBtn = document.getElementById("speakAnswerBtn");
+          if (!speakAnswerBtn) {
+            speakAnswerBtn = document.createElement("button");
+            speakAnswerBtn.id = "speakAnswerBtn";
+            speakAnswerBtn.className = "speak-btn";
+            speakAnswerBtn.title = "Speak answer in Indian English";
+            speakAnswerBtn.innerHTML =
+              '<i class="fas fa-volume-up" aria-hidden="true"></i>';
+            speakAnswerBtn.onclick = () => window.speakAnswer(speakAnswerBtn);
+            contentContainer.insertBefore(speakAnswerBtn, answerText);
+          }
           speakAnswerBtn.disabled = false;
           questionInput.value = "";
         } catch (error) {
@@ -1052,7 +1100,8 @@
           status.textContent = `Error: ${error.message}`;
           status.classList.add("error");
           status.classList.remove("success");
-          speakAnswerBtn.disabled = true;
+          const speakAnswerBtn = document.getElementById("speakAnswerBtn");
+          if (speakAnswerBtn) speakAnswerBtn.disabled = true;
         } finally {
           questionBtn.disabled = false;
         }
