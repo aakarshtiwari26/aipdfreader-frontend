@@ -676,6 +676,7 @@
       let currentUtterance = null;
       let activeButton = null;
       let voices = [];
+      let currentText = ""; // Store text for resume after forced pause
 
       // Preload voices synchronously
       function preloadVoices() {
@@ -702,7 +703,6 @@
       // Initialize voices on page load
       document.addEventListener("DOMContentLoaded", () => {
         preloadVoices();
-        // Minimal onvoiceschanged to update voices if changed
         window.speechSynthesis.onvoiceschanged = () => {
           voices = window.speechSynthesis.getVoices();
           console.log(
@@ -808,18 +808,39 @@
               );
               return;
             } else if (isSpeaking) {
-              console.log("TTS: Pausing speech");
-              window.speechSynthesis.pause();
-              isPaused = true;
-              isSpeaking = false;
-              requestAnimationFrame(() => {
-                button.classList.add("paused");
-                button.innerHTML =
-                  '<i class="fas fa-play" aria-hidden="true"></i>';
-              });
-              console.log(
-                `TTS: Pause latency: ${performance.now() - startTime}ms`
-              );
+              console.log("TTS: Attempting to pause speech");
+              // Force pause with fallback to cancel
+              try {
+                window.speechSynthesis.pause();
+                isPaused = true;
+                isSpeaking = false;
+                currentText = text; // Store text for resume
+                requestAnimationFrame(() => {
+                  button.classList.add("paused");
+                  button.innerHTML =
+                    '<i class="fas fa-play" aria-hidden="true"></i>';
+                });
+                console.log(
+                  `TTS: Pause latency: ${performance.now() - startTime}ms`
+                );
+              } catch (error) {
+                console.error("TTS: Pause failed, forcing cancel", error);
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+                isPaused = true;
+                currentText = text;
+                currentUtterance = null;
+                requestAnimationFrame(() => {
+                  button.classList.add("paused");
+                  button.innerHTML =
+                    '<i class="fas fa-play" aria-hidden="true"></i>';
+                });
+                console.log(
+                  `TTS: Forced pause latency: ${
+                    performance.now() - startTime
+                  }ms`
+                );
+              }
               return;
             }
           }
@@ -831,6 +852,7 @@
           isPaused = false;
           currentUtterance = null;
           activeButton = null;
+          currentText = text;
 
           // Ensure voices are available
           if (!voices.length) {
@@ -877,6 +899,7 @@
             isPaused = false;
             activeButton = null;
             currentUtterance = null;
+            currentText = "";
             resetAllSpeakButtons();
           };
           utterance.onerror = (event) => {
@@ -885,6 +908,7 @@
             isPaused = false;
             activeButton = null;
             currentUtterance = null;
+            currentText = "";
             resetAllSpeakButtons();
           };
 
