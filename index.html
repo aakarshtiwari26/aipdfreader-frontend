@@ -695,22 +695,19 @@
           return;
         }
 
-        // Stop any ongoing speech
-        stopSpeech();
-
         // Load voices
         const voices = window.speechSynthesis.getVoices();
         if (!voices.length) {
           console.log("TTS: No voices available, retrying...");
-          setTimeout(() => {
+          window.speechSynthesis.onvoiceschanged = () => {
             const retryVoices = window.speechSynthesis.getVoices();
             if (retryVoices.length) {
               speakText(text, button); // Retry with voices
             } else {
-              console.error("TTS: Failed to load voices");
+              console.error("TTS: Failed to load voices after retry");
               button.disabled = true;
             }
-          }, 100);
+          };
           return;
         }
 
@@ -719,6 +716,11 @@
           voices.find((v) => v.lang === "en-IN") ||
           voices.find((v) => v.lang === "en-US") ||
           voices[0];
+        if (!preferredVoice) {
+          console.error("TTS: No suitable voice found");
+          button.disabled = true;
+          return;
+        }
         utterance.voice = preferredVoice;
         utterance.lang = preferredVoice.lang;
         utterance.pitch = 1;
@@ -824,7 +826,7 @@
 
           const index = btn.dataset.index;
           const textElement = sectionList.querySelector(
-            `#section-summary-${index}`
+            `#section-text-${index}`
           );
           const text = textElement?.textContent.trim();
 
@@ -1009,7 +1011,7 @@
               li.id = `section-${index}`;
               li.innerHTML = `
                 <h3>${section.heading || "Untitled Section"}</h3>
-                <p id="section-summary-${index}">${
+                <p id="section-text-${index}">${
                 section.summary || "No summary available."
               }</p>
                 <button class="tts-btn" data-index="${index}" title="Speak section summary" ${
