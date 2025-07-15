@@ -389,33 +389,48 @@
       .section-list {
         list-style: none;
         padding: 0;
+        background: #f9fbfc;
+        border-radius: 12px;
+        padding: 1.5rem;
       }
 
       .section-item {
-        margin-bottom: 1.5rem;
-        border-bottom: 1px solid #d4dde0;
-        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        border: 1px solid #d4dde0;
+        border-radius: 8px;
+        background: #ffffff;
+        box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease;
+      }
+
+      .section-item:hover {
+        transform: translateY(-5px);
       }
 
       .section-item h3 {
-        font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+        font-size: clamp(1.3rem, 2.5vw, 1.5rem);
         color: #1a4d5f;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
       }
 
       .section-item p {
-        margin-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        font-size: clamp(0.95rem, 2vw, 1.1rem);
+        color: #1c2526;
       }
 
       .section-item a {
         color: #1a4d5f;
         text-decoration: none;
         font-weight: 500;
-        margin-right: 0.5rem;
+        margin-right: 0.75rem;
       }
 
       .section-item a:hover {
         text-decoration: underline;
+        color: #153f4e;
       }
 
       .section-select {
@@ -425,6 +440,7 @@
         border: 1px solid #d4dde0;
         font-size: clamp(0.95rem, 2vw, 1.1rem);
         margin-bottom: 1rem;
+        background: #ffffff;
       }
 
       footer {
@@ -460,6 +476,9 @@
           padding: 2rem;
           margin-bottom: 1.5rem;
         }
+        .section-item {
+          padding: 1rem;
+        }
       }
 
       @media (max-width: 768px) {
@@ -492,6 +511,9 @@
           width: 36px;
           height: 36px;
           padding: 0.4rem;
+        }
+        .section-item {
+          padding: 0.75rem;
         }
       }
 
@@ -593,6 +615,7 @@
           class="speak-btn"
           disabled
           title="Speak answer in Indian English"
+          onclick="speakAnswer()"
         >
           <i class="fas fa-volume-up" aria-hidden="true"></i>
         </button>
@@ -673,6 +696,10 @@
         }
 
         function speakText(text, button) {
+          if (!text) {
+            console.log("TTS: No text to speak");
+            return;
+          }
           if (isSpeaking) {
             window.speechSynthesis.cancel();
             isSpeaking = false;
@@ -685,14 +712,25 @@
           const voices = window.speechSynthesis.getVoices();
           const indianVoice =
             voices.find((voice) => voice.lang === "en-IN") ||
-            voices.find((voice) => voice.lang === "en-US");
+            voices.find((voice) => voice.lang === "en-US") ||
+            voices[0];
           utterance.voice = indianVoice;
           utterance.lang = indianVoice ? indianVoice.lang : "en-IN";
           utterance.pitch = 1;
           utterance.rate = 1;
           utterance.volume = 1;
 
+          utterance.onstart = () => {
+            console.log("TTS: Speaking started");
+          };
           utterance.onend = () => {
+            isSpeaking = false;
+            button.innerHTML =
+              '<i class="fas fa-volume-up" aria-hidden="true"></i>';
+            console.log("TTS: Speaking ended");
+          };
+          utterance.onerror = (event) => {
+            console.error("TTS error:", event.error);
             isSpeaking = false;
             button.innerHTML =
               '<i class="fas fa-volume-up" aria-hidden="true"></i>';
@@ -704,21 +742,35 @@
           button.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
         }
 
-        window.speechSynthesis.onvoiceschanged = () => {};
+        window.speechSynthesis.onvoiceschanged = () => {
+          console.log("TTS: Voices loaded", window.speechSynthesis.getVoices());
+        };
 
         sectionList.addEventListener("click", (e) => {
           if (e.target.classList.contains("speak-section-btn")) {
             const index = e.target.dataset.index;
             const text = sectionList.querySelector(
               `#section-summary-${index}`
-            ).textContent.trim();
+            )?.textContent.trim();
             if (text) {
+              console.log("TTS: Triggered for section", index);
               speakText(text, e.target);
+            } else {
+              console.log("TTS: No summary text for section", index);
             }
           }
         });
 
         window.simulateProgress = simulateProgress;
+        window.speakAnswer = () => {
+          const text = answerText.textContent.trim();
+          if (text && text !== "Answers will appear here.") {
+            console.log("TTS: Triggered for answer");
+            speakText(text, speakAnswerBtn);
+          } else {
+            console.log("TTS: No answer text to speak");
+          }
+        };
       });
 
       async function uploadPDF() {
@@ -752,7 +804,7 @@
         window.simulateProgress();
 
         try {
-          const response = await fetch("/api/upload", {
+          const response = await fetch("https://aipdfreader-0f7m.onrender.com/api/upload", {
             method: "POST",
             body: formData,
             credentials: "include",
@@ -862,7 +914,7 @@
         answerText.classList.remove("slide-in");
 
         try {
-          const response = await fetch("/api/upload", {
+          const response = await fetch("https://aipdfreader-0f7m.onrender.com/api/ask", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ question, context: extractedData, sectionIndex }),
