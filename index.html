@@ -676,14 +676,13 @@
       let currentUtterance = null;
       let activeButton = null;
       let voices = [];
-      let currentText = ""; // Store text for resume after forced pause
-      let pauseAttempt = 0; // Track pause attempts for debugging
+      let currentText = "";
+      let pauseAttempt = 0;
 
       // Preload voices synchronously
       function preloadVoices() {
         voices = window.speechSynthesis.getVoices();
         if (!voices.length) {
-          // Force browser to load voices with multiple calls
           window.speechSynthesis.getVoices();
           window.speechSynthesis.getVoices();
           setTimeout(() => {
@@ -792,6 +791,10 @@
             return;
           }
 
+          console.log(
+            `TTS: State before action - isSpeaking: ${isSpeaking}, isPaused: ${isPaused}, activeButton: ${!!activeButton}, utterance: ${!!currentUtterance}`
+          );
+
           // Handle pause/resume for same button
           if (activeButton === button && currentUtterance) {
             if (isPaused) {
@@ -799,7 +802,7 @@
               window.speechSynthesis.resume();
               isPaused = false;
               isSpeaking = true;
-              pauseAttempt = 0; // Reset pause attempt counter
+              pauseAttempt = 0;
               requestAnimationFrame(() => {
                 button.classList.remove("paused");
                 button.innerHTML =
@@ -808,6 +811,9 @@
               console.log(
                 `TTS: Resume latency: ${performance.now() - startTime}ms`
               );
+              console.log(
+                `TTS: State after resume - isSpeaking: ${isSpeaking}, isPaused: ${isPaused}`
+              );
               return;
             } else if (isSpeaking) {
               pauseAttempt++;
@@ -815,12 +821,12 @@
                 `TTS: Attempting to pause speech (attempt ${pauseAttempt})`
               );
               try {
-                // Small delay to ensure utterance is pausable
+                // Micro-delay to stabilize utterance
                 setTimeout(() => {
                   window.speechSynthesis.pause();
                   isPaused = true;
                   isSpeaking = false;
-                  currentText = text; // Store text for resume
+                  currentText = text;
                   requestAnimationFrame(() => {
                     button.classList.add("paused");
                     button.innerHTML =
@@ -831,7 +837,10 @@
                       performance.now() - startTime
                     }ms`
                   );
-                }, 1); // 1ms delay to stabilize utterance
+                  console.log(
+                    `TTS: State after pause - isSpeaking: ${isSpeaking}, isPaused: ${isPaused}`
+                  );
+                }, 2); // 2ms delay to ensure pausable state
               } catch (error) {
                 console.error(
                   `TTS: Pause attempt ${pauseAttempt} failed, forcing cancel`,
@@ -851,6 +860,9 @@
                   `TTS: Forced pause attempt ${pauseAttempt} latency: ${
                     performance.now() - startTime
                   }ms`
+                );
+                console.log(
+                  `TTS: State after forced pause - isSpeaking: ${isSpeaking}, isPaused: ${isPaused}`
                 );
               }
               return;
@@ -906,6 +918,9 @@
             console.log(
               `TTS: Play latency: ${performance.now() - startTime}ms`
             );
+            console.log(
+              `TTS: State after play - isSpeaking: ${isSpeaking}, isPaused: ${isPaused}`
+            );
           };
           utterance.onend = () => {
             console.log("TTS: Speaking ended");
@@ -916,6 +931,9 @@
             currentText = "";
             pauseAttempt = 0;
             resetAllSpeakButtons();
+            console.log(
+              `TTS: State after end - isSpeaking: ${isSpeaking}, isPaused: ${isPaused}`
+            );
           };
           utterance.onerror = (event) => {
             console.error("TTS error:", event.error);
@@ -926,6 +944,9 @@
             currentText = "";
             pauseAttempt = 0;
             resetAllSpeakButtons();
+            console.log(
+              `TTS: State after error - isSpeaking: ${isSpeaking}, isPaused: ${isPaused}`
+            );
           };
 
           window.speechSynthesis.speak(utterance);
@@ -933,7 +954,13 @@
           activeButton = button;
         }
 
+        // Debounce clicks to prevent rapid-fire issues
+        let lastClickTime = 0;
         sectionList.addEventListener("click", (e) => {
+          const currentTime = performance.now();
+          if (currentTime - lastClickTime < 50) return; // Debounce <50ms
+          lastClickTime = currentTime;
+
           const btn = e.target.closest(".speak-section-btn");
           if (btn) {
             const index = btn.dataset.index;
@@ -951,6 +978,10 @@
 
         window.simulateProgress = simulateProgress;
         window.speakAnswer = (button) => {
+          const currentTime = performance.now();
+          if (currentTime - lastClickTime < 50) return; // Debounce <50ms
+          lastClickTime = currentTime;
+
           const text = answerText.textContent.trim();
           if (text && text !== "Answers will appear here.") {
             console.log("TTS: Triggered for answer");
