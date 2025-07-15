@@ -1100,24 +1100,24 @@
               li.className = "section-item";
               li.id = `section-${index}`;
               li.innerHTML = `
-                <h3>${section.heading || "Untitled Section"}</h3>
-                <p id="section-summary-${index}">${
+          <h3>${section.heading || "Untitled Section"}</h3>
+          <p id="section-summary-${index}">${
                 section.summary || "No summary available."
               }</p>
-                <button class="speak-btn speak-section-btn" data-index="${index}" title="Speak section summary">
-                  <i class="fas fa-volume-up" aria-hidden="true"></i>
-                </button>
-                <p>Related: ${
-                  section.related && section.related.length
-                    ? section.related
-                        .map(
-                          (rel) =>
-                            `<a href="#section-${rel.index}" onclick="scrollToSection(${rel.index})">${rel.heading}</a>`
-                        )
-                        .join(", ")
-                    : "None"
-                }</p>
-              `;
+          <button class="speak-btn speak-section-btn" data-index="${index}" title="Speak section summary">
+            <i class="fas fa-volume-up" aria-hidden="true"></i>
+          </button>
+          <p>Related: ${
+            section.related && section.related.length
+              ? section.related
+                  .map(
+                    (rel) =>
+                      `<a href="#section-${rel.index}" onclick="scrollToSection(${rel.index})">${rel.heading}</a>`
+                  )
+                  .join(", ")
+              : "None"
+          }</p>
+        `;
               sectionList.appendChild(li);
 
               const option = document.createElement("option");
@@ -1242,5 +1242,4 @@
       }
     </script>
   </body>
-  
 </html>
