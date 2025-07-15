@@ -677,43 +677,37 @@
       let activeButton = null;
       let voices = [];
 
-      // Promise-based voice loading
-      function loadVoices() {
-        return new Promise((resolve, reject) => {
-          let retries = 0;
-          const maxRetries = 3;
-          const retryInterval = 50;
-
-          const tryLoad = () => {
+      // Preload voices synchronously
+      function preloadVoices() {
+        voices = window.speechSynthesis.getVoices();
+        if (!voices.length) {
+          // Trigger multiple times to force browser to load voices
+          window.speechSynthesis.getVoices();
+          setTimeout(() => {
             voices = window.speechSynthesis.getVoices();
             console.log(
-              "TTS: Voices loaded",
+              "TTS: Voices preloaded",
               voices.map((v) => v.lang)
             );
-            if (voices.length) {
-              resolve(voices);
-            } else if (retries < maxRetries) {
-              retries++;
-              console.log(
-                `TTS: No voices, retrying (${retries}/${maxRetries})...`
-              );
-              setTimeout(tryLoad, retryInterval);
-            } else {
-              console.error("TTS: Failed to load voices after max retries");
-              reject(new Error("No voices loaded"));
-            }
-          };
-
-          window.speechSynthesis.onvoiceschanged = tryLoad;
-          tryLoad();
-        });
+          }, 0);
+        } else {
+          console.log(
+            "TTS: Voices preloaded",
+            voices.map((v) => v.lang)
+          );
+        }
       }
 
       // Initialize voices on page load
       document.addEventListener("DOMContentLoaded", () => {
-        loadVoices().catch((err) =>
-          console.error("TTS: Voice load error", err)
-        );
+        preloadVoices();
+        window.speechSynthesis.onvoiceschanged = () => {
+          voices = window.speechSynthesis.getVoices();
+          console.log(
+            "TTS: Voices updated",
+            voices.map((v) => v.lang)
+          );
+        };
 
         const uploadArea = document.getElementById("uploadArea");
         const pdfInput = document.getElementById("pdfInput");
@@ -725,11 +719,15 @@
         const questionInput = document.getElementById("questionInput");
 
         // Reset all speaker buttons' state
-        function resetAllSpeakButtons() {
-          document.querySelectorAll(".speak-btn").forEach((btn) => {
-            btn.classList.remove("paused");
-            btn.innerHTML =
-              '<i class="fas fa-volume-up" aria-hidden="true"></i>';
+        function resetAllSpeakButtons(excludeButton = null) {
+          requestAnimationFrame(() => {
+            document.querySelectorAll(".speak-btn").forEach((btn) => {
+              if (btn !== excludeButton) {
+                btn.classList.remove("paused");
+                btn.innerHTML =
+                  '<i class="fas fa-volume-up" aria-hidden="true"></i>';
+              }
+            });
           });
         }
 
@@ -784,21 +782,20 @@
           }, 2000);
         }
 
-        async function speakText(text, button) {
+        function speakText(text, button) {
+          const startTime = performance.now();
           if (!text) {
             console.log("TTS: No text to speak");
             return;
           }
 
-          // Ensure voices are loaded
-          if (!voices.length) {
-            try {
-              await loadVoices();
-            } catch (err) {
-              console.error("TTS: Failed to load voices", err);
-              return;
-            }
-          }
+          // Stop any ongoing speech
+          window.speechSynthesis.cancel();
+          resetAllSpeakButtons(button);
+          isSpeaking = false;
+          isPaused = false;
+          currentUtterance = null;
+          activeButton = null;
 
           // Handle pause/resume for same button
           if (activeButton === button && currentUtterance) {
@@ -807,29 +804,40 @@
               window.speechSynthesis.resume();
               isPaused = false;
               isSpeaking = true;
-              button.classList.remove("paused");
-              button.innerHTML =
-                '<i class="fas fa-pause" aria-hidden="true"></i>';
+              requestAnimationFrame(() => {
+                button.classList.remove("paused");
+                button.innerHTML =
+                  '<i class="fas fa-pause" aria-hidden="true"></i>';
+              });
+              console.log(
+                `TTS: Resume latency: ${performance.now() - startTime}ms`
+              );
               return;
             } else if (isSpeaking) {
               console.log("TTS: Pausing speech");
               window.speechSynthesis.pause();
               isPaused = true;
               isSpeaking = false;
-              button.classList.add("paused");
-              button.innerHTML =
-                '<i class="fas fa-play" aria-hidden="true"></i>';
+              requestAnimationFrame(() => {
+                button.classList.add("paused");
+                button.innerHTML =
+                  '<i class="fas fa-play" aria-hidden="true"></i>';
+              });
+              console.log(
+                `TTS: Pause latency: ${performance.now() - startTime}ms`
+              );
               return;
             }
           }
 
-          // Stop any ongoing speech
-          window.speechSynthesis.cancel();
-          resetAllSpeakButtons();
-          isSpeaking = false;
-          isPaused = false;
-          currentUtterance = null;
-          activeButton = null;
+          // Ensure voices are available
+          if (!voices.length) {
+            voices = window.speechSynthesis.getVoices();
+            if (!voices.length) {
+              console.error("TTS: No voices available");
+              return;
+            }
+          }
 
           // Create new utterance
           const utterance = new SpeechSynthesisUtterance(text);
@@ -848,13 +856,18 @@
           utterance.volume = 1;
 
           utterance.onstart = () => {
-            console.log("TTS: Speaking started", indianVoice.lang);
+            console.log(`TTS: Speaking started (${indianVoice.lang})`);
             isSpeaking = true;
             isPaused = false;
             activeButton = button;
-            button.classList.remove("paused");
-            button.innerHTML =
-              '<i class="fas fa-pause" aria-hidden="true"></i>';
+            requestAnimationFrame(() => {
+              button.classList.remove("paused");
+              button.innerHTML =
+                '<i class="fas fa-pause" aria-hidden="true"></i>';
+            });
+            console.log(
+              `TTS: Play latency: ${performance.now() - startTime}ms`
+            );
           };
           utterance.onend = () => {
             console.log("TTS: Speaking ended");
@@ -878,7 +891,7 @@
           activeButton = button;
         }
 
-        sectionList.addEventListener("click", async (e) => {
+        sectionList.addEventListener("click", (e) => {
           if (e.target.classList.contains("speak-section-btn")) {
             const index = e.target.dataset.index;
             const text = sectionList
@@ -886,7 +899,7 @@
               ?.textContent.trim();
             if (text) {
               console.log("TTS: Triggered for section", index);
-              await speakText(text, e.target);
+              speakText(text, e.target);
             } else {
               console.log("TTS: No summary text for section", index);
             }
@@ -894,11 +907,11 @@
         });
 
         window.simulateProgress = simulateProgress;
-        window.speakAnswer = async (button) => {
+        window.speakAnswer = (button) => {
           const text = answerText.textContent.trim();
           if (text && text !== "Answers will appear here.") {
             console.log("TTS: Triggered for answer");
-            await speakText(text, button);
+            speakText(text, button);
           } else {
             console.log("TTS: No answer text to speak");
           }
