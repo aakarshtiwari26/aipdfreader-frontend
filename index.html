@@ -450,6 +450,33 @@
         vertical-align: middle;
       }
 
+      footer {
+        text-align: center;
+        padding: 2rem;
+        color: #5e6e70;
+        font-size: clamp(0.9rem, 1.8vw, 1rem);
+        background: #ffffff;
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+        line-height: 2;
+      }
+
+      footer q {
+        font-style: italic;
+        color: #4a5b5d;
+      }
+
+      footer a {
+        color: #1a4d5f;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+      }
+
+      footer a:hover {
+        color: #153f4e;
+        text-decoration: underline;
+      }
+
       @media (max-width: 1024px) {
         .container {
           max-width: 95%;
@@ -544,6 +571,7 @@
         }
         footer {
           padding: 1.5rem;
+          line-height: 1.8;
         }
       }
     </style>
@@ -620,15 +648,8 @@
     <footer>
       <p>
         © 2025 Pagify. All rights reserved.<br />
-        <q>Education is the manifestation of the perfection already in man.</q>
-        — Swami Vivekananda <br />
-        Designed & Developed by
-        <a
-          href="https://www.linkedin.com/in/aakarshtiwari/"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Aakarsh Tiwari</a
-        ><br />
+        <q>Education is the manifestation of the perfection already in man.</q> — Swami Vivekananda<br />
+        Designed & Developed by <a href="https://www.linkedin.com/in/aakarshtiwari/" target="_blank" rel="noopener noreferrer">Aakarsh Tiwari</a>
       </p>
     </footer>
     <script>
@@ -636,18 +657,38 @@
       let isSpeaking = false;
       let currentUtterance = null;
 
-      // Preload voices
+      // Promise-based voice loading
       let voices = [];
-      function loadVoices(retryCount = 0) {
-        voices = window.speechSynthesis.getVoices();
-        console.log("TTS: Voices loaded", voices.map(v => v.lang));
-        if (!voices.length && retryCount < 3) {
-          console.log("TTS: No voices, retrying...");
-          setTimeout(() => loadVoices(retryCount + 1), 500);
-        }
+      function loadVoices() {
+        return new Promise((resolve, reject) => {
+          let retries = 0;
+          const maxRetries = 5;
+          const retryInterval = 500;
+
+          const tryLoad = () => {
+            voices = window.speechSynthesis.getVoices();
+            console.log("TTS: Voices loaded", voices.map(v => v.lang));
+            if (voices.length) {
+              resolve(voices);
+            } else if (retries < maxRetries) {
+              retries++;
+              console.log(`TTS: No voices, retrying (${retries}/${maxRetries})...`);
+              setTimeout(tryLoad, retryInterval);
+            } else {
+              console.error("TTS: Failed to load voices after max retries");
+              reject(new Error("No voices loaded"));
+            }
+          };
+
+          window.speechSynthesis.onvoiceschanged = tryLoad;
+          tryLoad();
+        });
       }
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-      loadVoices();
+
+      // Initialize voices on page load
+      document.addEventListener("DOMContentLoaded", () => {
+        loadVoices().catch(err => console.error("TTS: Voice load error", err));
+      });
 
       document.addEventListener("DOMContentLoaded", () => {
         const uploadArea = document.getElementById("uploadArea");
@@ -694,7 +735,6 @@
           status.classList.remove("error", "success");
         });
 
-        // Enter key submission
         questionInput.addEventListener("keydown", (e) => {
           if (e.key === "Enter" && !document.getElementById("questionBtn").disabled) {
             console.log("Enter key pressed, triggering askQuestion");
@@ -709,17 +749,26 @@
           }, 2000);
         }
 
-        function speakText(text, button) {
+        async function speakText(text, button) {
           if (!text) {
             console.log("TTS: No text to speak");
             return;
           }
+
+          // Ensure voices are loaded
+          if (!voices.length) {
+            try {
+              await loadVoices();
+            } catch (err) {
+              console.error("TTS: Failed to load voices", err);
+              return;
+            }
+          }
+
+          // Reset state
           if (isSpeaking) {
             window.speechSynthesis.cancel();
             isSpeaking = false;
-            button.innerHTML =
-              '<i class="fas fa-volume-up" aria-hidden="true"></i>';
-            return;
           }
 
           const utterance = new SpeechSynthesisUtterance(text);
@@ -739,27 +788,27 @@
 
           utterance.onstart = () => {
             console.log("TTS: Speaking started", indianVoice.lang);
+            button.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
+            isSpeaking = true;
+            currentUtterance = utterance;
           };
           utterance.onend = () => {
-            isSpeaking = false;
-            button.innerHTML =
-              '<i class="fas fa-volume-up" aria-hidden="true"></i>';
             console.log("TTS: Speaking ended");
+            isSpeaking = false;
+            currentUtterance = null;
+            button.innerHTML = '<i class="fas fa-volume-up" aria-hidden="true"></i>';
           };
           utterance.onerror = (event) => {
             console.error("TTS error:", event.error);
             isSpeaking = false;
-            button.innerHTML =
-              '<i class="fas fa-volume-up" aria-hidden="true"></i>';
+            currentUtterance = null;
+            button.innerHTML = '<i class="fas fa-volume-up" aria-hidden="true"></i>';
           };
 
           window.speechSynthesis.speak(utterance);
-          isSpeaking = true;
-          currentUtterance = utterance;
-          button.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
         }
 
-        sectionList.addEventListener("click", (e) => {
+        sectionList.addEventListener("click", async (e) => {
           if (e.target.classList.contains("speak-section-btn")) {
             const index = e.target.dataset.index;
             const text = sectionList.querySelector(
@@ -767,7 +816,7 @@
             )?.textContent.trim();
             if (text) {
               console.log("TTS: Triggered for section", index);
-              speakText(text, e.target);
+              await speakText(text, e.target);
             } else {
               console.log("TTS: No summary text for section", index);
             }
@@ -775,11 +824,11 @@
         });
 
         window.simulateProgress = simulateProgress;
-        window.speakAnswer = () => {
+        window.speakAnswer = async () => {
           const text = answerText.textContent.trim();
           if (text && text !== "Answers will appear here.") {
             console.log("TTS: Triggered for answer");
-            speakText(text, speakAnswerBtn);
+            await speakText(text, speakAnswerBtn);
           } else {
             console.log("TTS: No answer text to speak");
           }
