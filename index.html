@@ -640,15 +640,6 @@
             Submit
           </button>
         </div>
-        <button
-          id="speakAnswerBtn"
-          class="speak-btn"
-          disabled
-          title="Speak answer in Indian English"
-          onclick="speakAnswer()"
-        >
-          <i class="fas fa-volume-up" aria-hidden="true"></i>
-        </button>
         <div class="content-container">
           <div id="answerText" class="content">Answers will appear here.</div>
         </div>
@@ -685,7 +676,8 @@
       function preloadVoices() {
         voices = window.speechSynthesis.getVoices();
         if (!voices.length) {
-          console.log("TTS: Initial voices empty, retrying...");
+          console.log("TTS: Initial voices empty, forcing load...");
+          window.speechSynthesis.getVoices(); // Force trigger
           let attempts = 0;
           const maxAttempts = 3;
           const retryInterval = setInterval(() => {
@@ -808,8 +800,10 @@
 
         function speakText(text, button) {
           const startTime = performance.now();
-          if (!text) {
-            console.log("TTS: No text to speak");
+          if (!text || text === "Answers will appear here.") {
+            console.log("TTS: No valid text to speak");
+            resetSpeechState();
+            resetAllSpeakButtons();
             return;
           }
 
@@ -830,21 +824,27 @@
           ) {
             if (speechState.isPaused) {
               console.log("TTS: Resuming speech");
-              window.speechSynthesis.resume();
-              speechState.isPaused = false;
-              speechState.isSpeaking = true;
-              speechState.pauseAttempt = 0;
-              requestAnimationFrame(() => {
-                button.classList.remove("paused");
-                button.innerHTML =
-                  '<i class="fas fa-pause" aria-hidden="true"></i>';
-              });
-              console.log(
-                `TTS: Resume latency: ${performance.now() - startTime}ms`
-              );
-              console.log(
-                `TTS: State after resume - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-              );
+              try {
+                window.speechSynthesis.resume();
+                speechState.isPaused = false;
+                speechState.isSpeaking = true;
+                speechState.pauseAttempt = 0;
+                requestAnimationFrame(() => {
+                  button.classList.remove("paused");
+                  button.innerHTML =
+                    '<i class="fas fa-pause" aria-hidden="true"></i>';
+                });
+                console.log(
+                  `TTS: Resume latency: ${performance.now() - startTime}ms`
+                );
+                console.log(
+                  `TTS: State after resume - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
+                );
+              } catch (error) {
+                console.error("TTS: Resume failed, restarting", error);
+                resetSpeechState();
+                speakText(text, button); // Retry
+              }
               return;
             } else if (speechState.isSpeaking) {
               speechState.pauseAttempt++;
@@ -906,8 +906,16 @@
           if (!voices.length) {
             voices = window.speechSynthesis.getVoices();
             if (!voices.length) {
-              console.error("TTS: No voices available, retrying...");
-              preloadVoices();
+              console.error("TTS: No voices available, forcing load...");
+              window.speechSynthesis.getVoices(); // Force trigger
+              setTimeout(() => {
+                voices = window.speechSynthesis.getVoices();
+                if (!voices.length) {
+                  console.error("TTS: Failed to load voices");
+                  return;
+                }
+                speakText(text, button); // Retry with voices
+              }, 100);
               return;
             }
           }
@@ -921,6 +929,7 @@
           if (!indianVoice) {
             console.error("TTS: No suitable voice found");
             resetSpeechState();
+            resetAllSpeakButtons();
             return;
           }
           utterance.voice = indianVoice;
@@ -964,9 +973,15 @@
             );
           };
 
-          window.speechSynthesis.speak(utterance);
-          speechState.currentUtterance = utterance;
-          speechState.activeButton = button;
+          try {
+            window.speechSynthesis.speak(utterance);
+            speechState.currentUtterance = utterance;
+            speechState.activeButton = button;
+          } catch (error) {
+            console.error("TTS: Speak failed, retrying", error);
+            resetSpeechState();
+            speakText(text, button); // Retry
+          }
         }
 
         // Debounce clicks to prevent rapid-fire issues
@@ -979,6 +994,10 @@
           const btn = e.target.closest(".speak-section-btn");
           if (btn) {
             const index = btn.dataset.index;
+            if (!index) {
+              console.log("TTS: Invalid section index");
+              return;
+            }
             const text = sectionList
               .querySelector(`#section-summary-${index}`)
               ?.textContent.trim();
@@ -1081,24 +1100,24 @@
               li.className = "section-item";
               li.id = `section-${index}`;
               li.innerHTML = `
-          <h3>${section.heading || "Untitled Section"}</h3>
-          <p id="section-summary-${index}">${
+                <h3>${section.heading || "Untitled Section"}</h3>
+                <p id="section-summary-${index}">${
                 section.summary || "No summary available."
               }</p>
-          <button class="speak-btn speak-section-btn" data-index="${index}" title="Speak section summary">
-            <i class="fas fa-volume-up" aria-hidden="true"></i>
-          </button>
-          <p>Related: ${
-            section.related && section.related.length
-              ? section.related
-                  .map(
-                    (rel) =>
-                      `<a href="#section-${rel.index}" onclick="scrollToSection(${rel.index})">${rel.heading}</a>`
-                  )
-                  .join(", ")
-              : "None"
-          }</p>
-        `;
+                <button class="speak-btn speak-section-btn" data-index="${index}" title="Speak section summary">
+                  <i class="fas fa-volume-up" aria-hidden="true"></i>
+                </button>
+                <p>Related: ${
+                  section.related && section.related.length
+                    ? section.related
+                        .map(
+                          (rel) =>
+                            `<a href="#section-${rel.index}" onclick="scrollToSection(${rel.index})">${rel.heading}</a>`
+                        )
+                        .join(", ")
+                    : "None"
+                }</p>
+              `;
               sectionList.appendChild(li);
 
               const option = document.createElement("option");
