@@ -563,9 +563,7 @@
       </section>
 
       <section id="structure-section" class="card">
-        <h2>
-          <i class="fas fa-sitemap" aria-hidden="true"></i> Document Structure
-        </h2>
+        <h2><i class="fas fa-sitemap" aria-hidden="true"></i> Document Structure</h2>
         <ul id="sectionList" class="section-list">
           <li>Upload a PDF to see its structure.</li>
         </ul>
@@ -711,9 +709,9 @@
         sectionList.addEventListener("click", (e) => {
           if (e.target.classList.contains("speak-section-btn")) {
             const index = e.target.dataset.index;
-            const text = sectionList
-              .querySelector(`#section-summary-${index}`)
-              .textContent.trim();
+            const text = sectionList.querySelector(
+              `#section-summary-${index}`
+            ).textContent.trim();
             if (text) {
               speakText(text, e.target);
             }
@@ -767,44 +765,50 @@
             );
           }
 
-          extractedData = result;
-          sectionList.innerHTML = "";
+          extractedData = { text: result.text || "", sections: Array.isArray(result.sections) ? result.sections : [] };
+          sectionList.innerHTML = extractedData.sections.length
+            ? ""
+            : "<li>No sections detected. Showing full document.</li>";
           sectionSelect.innerHTML =
             '<option value="">Select a section (optional)</option>';
-          result.sections.forEach((section, index) => {
-            const li = document.createElement("li");
-            li.className = "section-item";
-            li.innerHTML = `
-              <h3>${section.heading}</h3>
-              <p id="section-summary-${index}">${section.summary}</p>
-              <button class="speak-btn speak-section-btn" data-index="${index}" title="Speak section summary">
-                <i class="fas fa-volume-up" aria-hidden="true"></i>
-              </button>
-              <p>Related: ${
-                section.related.length
-                  ? section.related
-                      .map(
-                        (rel) =>
-                          `<a href="#section-${rel.index}" onclick="scrollToSection(${rel.index})">${rel.heading}</a>`
-                      )
-                      .join(", ")
-                  : "None"
-              }</p>
-            `;
-            sectionList.appendChild(li);
 
-            const option = document.createElement("option");
-            option.value = index;
-            option.textContent = section.heading;
-            sectionSelect.appendChild(option);
-          });
+          if (Array.isArray(extractedData.sections)) {
+            extractedData.sections.forEach((section, index) => {
+              const li = document.createElement("li");
+              li.className = "section-item";
+              li.id = `section-${index}`;
+              li.innerHTML = `
+                <h3>${section.heading || "Untitled Section"}</h3>
+                <p id="section-summary-${index}">${section.summary || "No summary available."}</p>
+                <button class="speak-btn speak-section-btn" data-index="${index}" title="Speak section summary">
+                  <i class="fas fa-volume-up" aria-hidden="true"></i>
+                </button>
+                <p>Related: ${
+                  section.related && section.related.length
+                    ? section.related
+                        .map(
+                          (rel) =>
+                            `<a href="#section-${rel.index}" onclick="scrollToSection(${rel.index})">${rel.heading}</a>`
+                        )
+                        .join(", ")
+                    : "None"
+                }</p>
+              `;
+              sectionList.appendChild(li);
+
+              const option = document.createElement("option");
+              option.value = index;
+              option.textContent = section.heading || "Untitled Section";
+              sectionSelect.appendChild(option);
+            });
+          }
 
           sectionList.classList.add("slide-in");
           status.textContent = "PDF processed successfully!";
           status.classList.add("success");
           status.classList.remove("error");
           document.getElementById("questionBtn").disabled = false;
-          sectionSelect.disabled = false;
+          sectionSelect.disabled = !extractedData.sections.length;
           pdfInput.value = "";
           uploadBtn.disabled = true;
         } catch (error) {
@@ -812,15 +816,17 @@
           status.textContent = `Error: ${error.message}`;
           status.classList.add("error");
           status.classList.remove("success");
+          sectionList.innerHTML = "<li>Failed to process PDF.</li>";
+          sectionSelect.innerHTML =
+            '<option value="">Select a section (optional)</option>';
+          sectionSelect.disabled = true;
         } finally {
           uploadBtn.disabled = !pdfInput.files[0];
         }
       }
 
       function scrollToSection(index) {
-        const section = document.querySelector(
-          `#section-list li:nth-child(${index + 1})`
-        );
+        const section = document.querySelector(`#section-${index}`);
         if (section) {
           section.scrollIntoView({ behavior: "smooth" });
         }
@@ -856,14 +862,10 @@
         answerText.classList.remove("slide-in");
 
         try {
-          const response = await fetch("/api/ask", {
+          const response = await fetch("/api/upload", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              question,
-              context: extractedData,
-              sectionIndex,
-            }),
+            body: JSON.stringify({ question, context: extractedData, sectionIndex }),
             credentials: "include",
           });
 
