@@ -679,7 +679,7 @@
           console.log("TTS: Initial voices empty, forcing load...");
           window.speechSynthesis.getVoices(); // Force trigger
           let attempts = 0;
-          const maxAttempts = 3;
+          const maxAttempts = 5; // Increased retries for reliability
           const retryInterval = setInterval(() => {
             voices = window.speechSynthesis.getVoices();
             if (voices.length || attempts >= maxAttempts) {
@@ -730,6 +730,7 @@
                 btn.classList.remove("paused");
                 btn.innerHTML =
                   '<i class="fas fa-volume-up" aria-hidden="true"></i>';
+                btn.disabled = false;
               }
             });
           });
@@ -833,6 +834,7 @@
                   button.classList.remove("paused");
                   button.innerHTML =
                     '<i class="fas fa-pause" aria-hidden="true"></i>';
+                  button.disabled = false;
                 });
                 console.log(
                   `TTS: Resume latency: ${performance.now() - startTime}ms`
@@ -852,25 +854,24 @@
                 `TTS: Attempting to pause speech (attempt ${speechState.pauseAttempt})`
               );
               try {
-                setTimeout(() => {
-                  window.speechSynthesis.pause();
-                  speechState.isPaused = true;
-                  speechState.isSpeaking = false;
-                  speechState.currentText = text;
-                  requestAnimationFrame(() => {
-                    button.classList.add("paused");
-                    button.innerHTML =
-                      '<i class="fas fa-play" aria-hidden="true"></i>';
-                  });
-                  console.log(
-                    `TTS: Pause attempt ${speechState.pauseAttempt} latency: ${
-                      performance.now() - startTime
-                    }ms`
-                  );
-                  console.log(
-                    `TTS: State after pause - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-                  );
-                }, 5);
+                window.speechSynthesis.pause();
+                speechState.isPaused = true;
+                speechState.isSpeaking = false;
+                speechState.currentText = text;
+                requestAnimationFrame(() => {
+                  button.classList.add("paused");
+                  button.innerHTML =
+                    '<i class="fas fa-play" aria-hidden="true"></i>';
+                  button.disabled = false;
+                });
+                console.log(
+                  `TTS: Pause attempt ${speechState.pauseAttempt} latency: ${
+                    performance.now() - startTime
+                  }ms`
+                );
+                console.log(
+                  `TTS: State after pause - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
+                );
               } catch (error) {
                 console.error(
                   `TTS: Pause attempt ${speechState.pauseAttempt} failed, forcing cancel`,
@@ -883,6 +884,7 @@
                   button.classList.add("paused");
                   button.innerHTML =
                     '<i class="fas fa-play" aria-hidden="true"></i>';
+                  button.disabled = false;
                 });
                 console.log(
                   `TTS: Forced pause attempt ${
@@ -904,18 +906,21 @@
 
           // Ensure voices are available
           if (!voices.length) {
+            console.error("TTS: No voices available, forcing load...");
             voices = window.speechSynthesis.getVoices();
             if (!voices.length) {
-              console.error("TTS: No voices available, forcing load...");
               window.speechSynthesis.getVoices(); // Force trigger
               setTimeout(() => {
                 voices = window.speechSynthesis.getVoices();
                 if (!voices.length) {
-                  console.error("TTS: Failed to load voices");
+                  console.error("TTS: Failed to load voices after retry");
+                  resetSpeechState();
+                  resetAllSpeakButtons();
+                  button.disabled = true;
                   return;
                 }
                 speakText(text, button); // Retry with voices
-              }, 100);
+              }, 150);
               return;
             }
           }
@@ -930,6 +935,7 @@
             console.error("TTS: No suitable voice found");
             resetSpeechState();
             resetAllSpeakButtons();
+            button.disabled = true;
             return;
           }
           utterance.voice = indianVoice;
@@ -948,6 +954,7 @@
               button.classList.remove("paused");
               button.innerHTML =
                 '<i class="fas fa-pause" aria-hidden="true"></i>';
+              button.disabled = false;
             });
             console.log(
               `TTS: Play latency: ${performance.now() - startTime}ms`
@@ -968,6 +975,7 @@
             console.error("TTS error:", event.error);
             resetSpeechState();
             resetAllSpeakButtons();
+            button.disabled = true;
             console.log(
               `TTS: State after error - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
             );
@@ -980,7 +988,7 @@
           } catch (error) {
             console.error("TTS: Speak failed, retrying", error);
             resetSpeechState();
-            speakText(text, button); // Retry
+            setTimeout(() => speakText(text, button), 50); // Retry after clearing queue
           }
         }
 
@@ -988,20 +996,24 @@
         let lastClickTime = 0;
         sectionList.addEventListener("click", (e) => {
           const currentTime = performance.now();
-          if (currentTime - lastClickTime < 50) return; // Debounce 50ms
+          if (currentTime - lastClickTime < 50) {
+            console.log("TTS: Click debounced");
+            return;
+          }
           lastClickTime = currentTime;
 
           const btn = e.target.closest(".speak-section-btn");
           if (btn) {
             const index = btn.dataset.index;
-            if (!index) {
+            if (index === undefined) {
               console.log("TTS: Invalid section index");
               return;
             }
-            const text = sectionList
-              .querySelector(`#section-summary-${index}`)
-              ?.textContent.trim();
-            if (text) {
+            const textElement = sectionList.querySelector(
+              `#section-summary-${index}`
+            );
+            const text = textElement?.textContent.trim();
+            if (text && text !== "No summary available.") {
               console.log(
                 "TTS: Triggered for section",
                 index,
@@ -1009,7 +1021,8 @@
               );
               speakText(text, btn);
             } else {
-              console.log("TTS: No summary text for section", index);
+              console.log("TTS: No valid summary text for section", index);
+              btn.disabled = true;
             }
           } else {
             console.log("TTS: No section button clicked");
@@ -1019,11 +1032,18 @@
         window.simulateProgress = simulateProgress;
         window.speakAnswer = (button) => {
           const currentTime = performance.now();
-          if (currentTime - lastClickTime < 50) return; // Debounce 50ms
+          if (currentTime - lastClickTime < 50) {
+            console.log("TTS: Click debounced");
+            return;
+          }
           lastClickTime = currentTime;
 
           const text = answerText.textContent.trim();
-          if (text && text !== "Answers will appear here.") {
+          if (
+            text &&
+            text !== "Answers will appear here." &&
+            text !== "No answer available."
+          ) {
             console.log(
               "TTS: Triggered for answer",
               text.substring(0, 50) + (text.length > 50 ? "..." : "")
@@ -1033,6 +1053,7 @@
             console.log("TTS: No valid answer text to speak");
             resetSpeechState();
             resetAllSpeakButtons();
+            button.disabled = true;
           }
         };
       });
