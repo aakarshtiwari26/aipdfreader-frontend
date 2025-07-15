@@ -244,6 +244,8 @@
         transition: all 0.3s ease;
         background: #ffffff;
         box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05);
+        line-height: normal;
+        vertical-align: middle;
       }
 
       input[type="text"]:focus {
@@ -256,6 +258,7 @@
         display: flex;
         gap: 1rem;
         align-items: center;
+        flex-wrap: wrap;
       }
 
       button {
@@ -272,6 +275,8 @@
         letter-spacing: 0.6px;
         box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.1),
           -4px -4px 8px rgba(255, 255, 255, 0.8);
+        line-height: normal;
+        vertical-align: middle;
       }
 
       button:hover:not(:disabled) {
@@ -435,33 +440,14 @@
 
       .section-select {
         width: 100%;
-        padding: 0.8rem;
-        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
         border: 1px solid #d4dde0;
         font-size: clamp(0.95rem, 2vw, 1.1rem);
-        margin-bottom: 1rem;
         background: #ffffff;
-      }
-
-      footer {
-        text-align: center;
-        padding: 2rem;
-        color: #5e6e70;
-        font-size: clamp(0.9rem, 1.8vw, 1rem);
-        background: #ffffff;
-        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
-      }
-
-      footer a {
-        color: #1a4d5f;
-        text-decoration: none;
-        font-weight: 600;
-        transition: color 0.3s ease;
-      }
-
-      footer a:hover {
-        color: #153f4e;
-        text-decoration: underline;
+        box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.05);
+        line-height: normal;
+        vertical-align: middle;
       }
 
       @media (max-width: 1024px) {
@@ -514,6 +500,12 @@
         }
         .section-item {
           padding: 0.75rem;
+        }
+        .section-select {
+          padding: 0.8rem 1rem;
+        }
+        input[type="text"] {
+          padding: 0.8rem 1rem;
         }
       }
 
@@ -644,6 +636,19 @@
       let isSpeaking = false;
       let currentUtterance = null;
 
+      // Preload voices
+      let voices = [];
+      function loadVoices(retryCount = 0) {
+        voices = window.speechSynthesis.getVoices();
+        console.log("TTS: Voices loaded", voices.map(v => v.lang));
+        if (!voices.length && retryCount < 3) {
+          console.log("TTS: No voices, retrying...");
+          setTimeout(() => loadVoices(retryCount + 1), 500);
+        }
+      }
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+      loadVoices();
+
       document.addEventListener("DOMContentLoaded", () => {
         const uploadArea = document.getElementById("uploadArea");
         const pdfInput = document.getElementById("pdfInput");
@@ -653,6 +658,7 @@
         const sectionSelect = document.getElementById("sectionSelect");
         const answerText = document.getElementById("answerText");
         const speakAnswerBtn = document.getElementById("speakAnswerBtn");
+        const questionInput = document.getElementById("questionInput");
 
         window.addEventListener("scroll", () => {
           const header = document.querySelector(".header");
@@ -688,6 +694,14 @@
           status.classList.remove("error", "success");
         });
 
+        // Enter key submission
+        questionInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !document.getElementById("questionBtn").disabled) {
+            console.log("Enter key pressed, triggering askQuestion");
+            askQuestion();
+          }
+        });
+
         function simulateProgress() {
           progressCircle.classList.add("active");
           setTimeout(() => {
@@ -709,19 +723,22 @@
           }
 
           const utterance = new SpeechSynthesisUtterance(text);
-          const voices = window.speechSynthesis.getVoices();
           const indianVoice =
             voices.find((voice) => voice.lang === "en-IN") ||
             voices.find((voice) => voice.lang === "en-US") ||
             voices[0];
+          if (!indianVoice) {
+            console.log("TTS: No suitable voice found");
+            return;
+          }
           utterance.voice = indianVoice;
-          utterance.lang = indianVoice ? indianVoice.lang : "en-IN";
+          utterance.lang = indianVoice.lang;
           utterance.pitch = 1;
           utterance.rate = 1;
           utterance.volume = 1;
 
           utterance.onstart = () => {
-            console.log("TTS: Speaking started");
+            console.log("TTS: Speaking started", indianVoice.lang);
           };
           utterance.onend = () => {
             isSpeaking = false;
@@ -741,10 +758,6 @@
           currentUtterance = utterance;
           button.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
         }
-
-        window.speechSynthesis.onvoiceschanged = () => {
-          console.log("TTS: Voices loaded", window.speechSynthesis.getVoices());
-        };
 
         sectionList.addEventListener("click", (e) => {
           if (e.target.classList.contains("speak-section-btn")) {
