@@ -6,11 +6,11 @@
     <title>Pagify - AI-Powered PDF Summarizer & Query Tool</title>
     <meta
       name="description"
-      content="Pagify: Upload PDFs, get AI-generated section-wise summaries, explore related content, ask questions, and hear answers in Indian English. Built by Aakarsh Tiwari using HTML, CSS, JavaScript, Node.js, Express, and MongoDB."
+      content="Pagify: Upload PDFs, get AI-generated section-wise summaries, explore related content, and ask questions. Built by Aakarsh Tiwari using HTML, CSS, JavaScript, Node.js, Express, and MongoDB."
     />
     <meta
       name="keywords"
-      content="Pagify, AI PDF reader, PDF summarizer, document analysis, text-to-speech PDF, Node.js, Express, MongoDB, Aakarsh Tiwari, PDF query tool, Indian English TTS, semantic linking"
+      content="Pagify, AI PDF reader, PDF summarizer, document analysis, Node.js, Express, MongoDB, Aakarsh Tiwari, PDF query tool, semantic linking"
     />
     <meta name="author" content="Aakarsh Tiwari" />
     <meta name="robots" content="index, follow" />
@@ -21,7 +21,7 @@
     />
     <meta
       property="og:description"
-      content="Upload PDFs, get section-wise summaries, explore related content, ask questions, and hear answers with Pagify's AI and text-to-speech in Indian English."
+      content="Upload PDFs, get section-wise summaries, explore related content, and ask questions with Pagify's AI."
     />
     <meta property="og:url" content="https://pagify.aakarshtiwari.com" />
     <meta property="og:type" content="website" />
@@ -36,7 +36,7 @@
     />
     <meta
       name="twitter:description"
-      content="Pagify: Summarize PDFs by section, explore related content, query specific sections, and listen to answers in Indian English. Powered by AI."
+      content="Pagify: Summarize PDFs by section, explore related content, and query specific sections. Powered by AI."
     />
     <meta
       name="twitter:image"
@@ -91,7 +91,7 @@
         "@type": "WebApplication",
         "name": "Pagify",
         "url": "https://pagify.aakarshtiwari.com",
-        "description": "Pagify is an AI-powered web app for uploading PDFs, generating section-wise summaries, exploring related content, querying sections, and listening to answers in Indian English using text-to-speech.",
+        "description": "Pagify is an AI-powered web app for uploading PDFs, generating section-wise summaries, exploring related content, and querying sections.",
         "applicationCategory": "Productivity",
         "operatingSystem": "Web",
         "creator": {
@@ -111,7 +111,7 @@
         "@type": "WebPage",
         "name": "Pagify - AI PDF Summarizer",
         "url": "https://pagify.aakarshtiwari.com",
-        "description": "Pagify lets you upload PDFs, get AI-generated section-wise summaries, explore related content, ask questions, and hear answers in Indian English. Built by Aakarsh Tiwari.",
+        "description": "Pagify lets you upload PDFs, get AI-generated section-wise summaries, explore related content, and ask questions. Built by Aakarsh Tiwari.",
         "mainEntity": {
           "@type": "WebApplication",
           "name": "Pagify"
@@ -319,44 +319,6 @@
         }
       }
 
-      .speak-btn {
-        background: #1a4d5f;
-        color: #ffffff;
-        border: none;
-        border-radius: 8px;
-        padding: 0.5rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        margin: 0.5rem 0;
-      }
-
-      .speak-btn:hover:not(:disabled) {
-        background: #153f4e;
-        transform: translateY(-2px);
-      }
-
-      .speak-btn:disabled {
-        background: #94a3b8;
-        cursor: not-allowed;
-      }
-
-      .speak-btn i {
-        font-size: 1.2rem;
-      }
-
-      .speak-btn.paused {
-        background: #ff9500;
-      }
-
-      .speak-btn.paused:hover:not(:disabled) {
-        background: #e68a00;
-      }
-
       .content-container {
         position: relative;
         margin-top: 1rem;
@@ -528,11 +490,6 @@
         .upload-area {
           padding: 1.5rem;
         }
-        .speak-btn {
-          width: 36px;
-          height: 36px;
-          padding: 0.4rem;
-        }
         .section-item {
           padding: 0.75rem;
         }
@@ -571,11 +528,6 @@
           width: 32px;
           height: 32px;
           border-width: 3px;
-        }
-        .speak-btn {
-          width: 32px;
-          height: 32px;
-          padding: 0.3rem;
         }
         footer {
           padding: 1.5rem;
@@ -662,57 +614,8 @@
     </footer>
     <script>
       let extractedData = { text: "", sections: [] };
-      const speechState = {
-        isSpeaking: false,
-        isPaused: false,
-        currentUtterance: null,
-        activeButton: null,
-        currentText: "",
-        pauseAttempt: 0,
-      };
-      let voices = [];
 
-      // Robust voice initialization
-      function preloadVoices() {
-        voices = window.speechSynthesis.getVoices();
-        if (!voices.length) {
-          console.log("TTS: Initial voices empty, forcing load...");
-          window.speechSynthesis.getVoices(); // Force trigger
-          let attempts = 0;
-          const maxAttempts = 5; // Increased retries for reliability
-          const retryInterval = setInterval(() => {
-            voices = window.speechSynthesis.getVoices();
-            if (voices.length || attempts >= maxAttempts) {
-              clearInterval(retryInterval);
-              console.log(
-                voices.length
-                  ? `TTS: Voices loaded after ${
-                      attempts + 1
-                    } attempts: ${voices.map((v) => v.lang)}`
-                  : "TTS: Failed to load voices after max attempts"
-              );
-            }
-            attempts++;
-          }, 100);
-        } else {
-          console.log(
-            "TTS: Voices preloaded",
-            voices.map((v) => v.lang)
-          );
-        }
-      }
-
-      // Initialize voices on page load
       document.addEventListener("DOMContentLoaded", () => {
-        preloadVoices();
-        window.speechSynthesis.onvoiceschanged = () => {
-          voices = window.speechSynthesis.getVoices();
-          console.log(
-            "TTS: Voices updated",
-            voices.map((v) => v.lang)
-          );
-        };
-
         const uploadArea = document.getElementById("uploadArea");
         const pdfInput = document.getElementById("pdfInput");
         const uploadBtn = document.getElementById("uploadBtn");
@@ -721,32 +624,6 @@
         const sectionSelect = document.getElementById("sectionSelect");
         const answerText = document.getElementById("answerText");
         const questionInput = document.getElementById("questionInput");
-
-        // Reset all speaker buttons' state
-        function resetAllSpeakButtons(excludeButton = null) {
-          requestAnimationFrame(() => {
-            document.querySelectorAll(".speak-btn").forEach((btn) => {
-              if (btn !== excludeButton) {
-                btn.classList.remove("paused");
-                btn.innerHTML =
-                  '<i class="fas fa-volume-up" aria-hidden="true"></i>';
-                btn.disabled = false;
-              }
-            });
-          });
-        }
-
-        // Reset speech state
-        function resetSpeechState() {
-          window.speechSynthesis.cancel();
-          speechState.isSpeaking = false;
-          speechState.isPaused = false;
-          speechState.currentUtterance = null;
-          speechState.activeButton = null;
-          speechState.currentText = "";
-          speechState.pauseAttempt = 0;
-          console.log("TTS: Speech state reset");
-        }
 
         window.addEventListener("scroll", () => {
           const header = document.querySelector(".header");
@@ -799,263 +676,7 @@
           }, 2000);
         }
 
-        function speakText(text, button) {
-          const startTime = performance.now();
-          if (!text || text === "Answers will appear here.") {
-            console.log("TTS: No valid text to speak");
-            resetSpeechState();
-            resetAllSpeakButtons();
-            return;
-          }
-
-          console.log(
-            `TTS: State before action - isSpeaking: ${
-              speechState.isSpeaking
-            }, isPaused: ${
-              speechState.isPaused
-            }, activeButton: ${!!speechState.activeButton}, utterance: ${!!speechState.currentUtterance}, textLength: ${
-              text.length
-            }`
-          );
-
-          // Handle pause/resume for same button
-          if (
-            speechState.activeButton === button &&
-            speechState.currentUtterance
-          ) {
-            if (speechState.isPaused) {
-              console.log("TTS: Resuming speech");
-              try {
-                window.speechSynthesis.resume();
-                speechState.isPaused = false;
-                speechState.isSpeaking = true;
-                speechState.pauseAttempt = 0;
-                requestAnimationFrame(() => {
-                  button.classList.remove("paused");
-                  button.innerHTML =
-                    '<i class="fas fa-pause" aria-hidden="true"></i>';
-                  button.disabled = false;
-                });
-                console.log(
-                  `TTS: Resume latency: ${performance.now() - startTime}ms`
-                );
-                console.log(
-                  `TTS: State after resume - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-                );
-              } catch (error) {
-                console.error("TTS: Resume failed, restarting", error);
-                resetSpeechState();
-                speakText(text, button); // Retry
-              }
-              return;
-            } else if (speechState.isSpeaking) {
-              speechState.pauseAttempt++;
-              console.log(
-                `TTS: Attempting to pause speech (attempt ${speechState.pauseAttempt})`
-              );
-              try {
-                window.speechSynthesis.pause();
-                speechState.isPaused = true;
-                speechState.isSpeaking = false;
-                speechState.currentText = text;
-                requestAnimationFrame(() => {
-                  button.classList.add("paused");
-                  button.innerHTML =
-                    '<i class="fas fa-play" aria-hidden="true"></i>';
-                  button.disabled = false;
-                });
-                console.log(
-                  `TTS: Pause attempt ${speechState.pauseAttempt} latency: ${
-                    performance.now() - startTime
-                  }ms`
-                );
-                console.log(
-                  `TTS: State after pause - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-                );
-              } catch (error) {
-                console.error(
-                  `TTS: Pause attempt ${speechState.pauseAttempt} failed, forcing cancel`,
-                  error
-                );
-                resetSpeechState();
-                speechState.isPaused = true;
-                speechState.currentText = text;
-                requestAnimationFrame(() => {
-                  button.classList.add("paused");
-                  button.innerHTML =
-                    '<i class="fas fa-play" aria-hidden="true"></i>';
-                  button.disabled = false;
-                });
-                console.log(
-                  `TTS: Forced pause attempt ${
-                    speechState.pauseAttempt
-                  } latency: ${performance.now() - startTime}ms`
-                );
-                console.log(
-                  `TTS: State after forced pause - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-                );
-              }
-              return;
-            }
-          }
-
-          // Stop any ongoing speech
-          resetSpeechState();
-          resetAllSpeakButtons(button);
-          speechState.currentText = text;
-
-          // Ensure voices are available
-          if (!voices.length) {
-            console.error("TTS: No voices available, forcing load...");
-            voices = window.speechSynthesis.getVoices();
-            if (!voices.length) {
-              window.speechSynthesis.getVoices(); // Force trigger
-              setTimeout(() => {
-                voices = window.speechSynthesis.getVoices();
-                if (!voices.length) {
-                  console.error("TTS: Failed to load voices after retry");
-                  resetSpeechState();
-                  resetAllSpeakButtons();
-                  button.disabled = true;
-                  return;
-                }
-                speakText(text, button); // Retry with voices
-              }, 150);
-              return;
-            }
-          }
-
-          // Create new utterance
-          const utterance = new SpeechSynthesisUtterance(text);
-          const indianVoice =
-            voices.find((voice) => voice.lang === "en-IN") ||
-            voices.find((voice) => voice.lang === "en-US") ||
-            voices[0];
-          if (!indianVoice) {
-            console.error("TTS: No suitable voice found");
-            resetSpeechState();
-            resetAllSpeakButtons();
-            button.disabled = true;
-            return;
-          }
-          utterance.voice = indianVoice;
-          utterance.lang = indianVoice.lang;
-          utterance.pitch = 1;
-          utterance.rate = 1;
-          utterance.volume = 1;
-
-          utterance.onstart = () => {
-            console.log(`TTS: Speaking started (${indianVoice.lang})`);
-            speechState.isSpeaking = true;
-            speechState.isPaused = false;
-            speechState.activeButton = button;
-            speechState.pauseAttempt = 0;
-            requestAnimationFrame(() => {
-              button.classList.remove("paused");
-              button.innerHTML =
-                '<i class="fas fa-pause" aria-hidden="true"></i>';
-              button.disabled = false;
-            });
-            console.log(
-              `TTS: Play latency: ${performance.now() - startTime}ms`
-            );
-            console.log(
-              `TTS: State after play - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-            );
-          };
-          utterance.onend = () => {
-            console.log("TTS: Speaking ended");
-            resetSpeechState();
-            resetAllSpeakButtons();
-            console.log(
-              `TTS: State after end - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-            );
-          };
-          utterance.onerror = (event) => {
-            console.error("TTS error:", event.error);
-            resetSpeechState();
-            resetAllSpeakButtons();
-            button.disabled = true;
-            console.log(
-              `TTS: State after error - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-            );
-          };
-
-          try {
-            window.speechSynthesis.speak(utterance);
-            speechState.currentUtterance = utterance;
-            speechState.activeButton = button;
-          } catch (error) {
-            console.error("TTS: Speak failed, retrying", error);
-            resetSpeechState();
-            setTimeout(() => speakText(text, button), 50); // Retry after clearing queue
-          }
-        }
-
-        // Debounce clicks to prevent rapid-fire issues
-        let lastClickTime = 0;
-        sectionList.addEventListener("click", (e) => {
-          const currentTime = performance.now();
-          if (currentTime - lastClickTime < 50) {
-            console.log("TTS: Click debounced");
-            return;
-          }
-          lastClickTime = currentTime;
-
-          const btn = e.target.closest(".speak-section-btn");
-          if (btn) {
-            const index = btn.dataset.index;
-            if (index === undefined) {
-              console.log("TTS: Invalid section index");
-              return;
-            }
-            const textElement = sectionList.querySelector(
-              `#section-summary-${index}`
-            );
-            const text = textElement?.textContent.trim();
-            if (text && text !== "No summary available.") {
-              console.log(
-                "TTS: Triggered for section",
-                index,
-                text.substring(0, 50) + (text.length > 50 ? "..." : "")
-              );
-              speakText(text, btn);
-            } else {
-              console.log("TTS: No valid summary text for section", index);
-              btn.disabled = true;
-            }
-          } else {
-            console.log("TTS: No section button clicked");
-          }
-        });
-
         window.simulateProgress = simulateProgress;
-        window.speakAnswer = (button) => {
-          const currentTime = performance.now();
-          if (currentTime - lastClickTime < 50) {
-            console.log("TTS: Click debounced");
-            return;
-          }
-          lastClickTime = currentTime;
-
-          const text = answerText.textContent.trim();
-          if (
-            text &&
-            text !== "Answers will appear here." &&
-            text !== "No answer available."
-          ) {
-            console.log(
-              "TTS: Triggered for answer",
-              text.substring(0, 50) + (text.length > 50 ? "..." : "")
-            );
-            speakText(text, button);
-          } else {
-            console.log("TTS: No valid answer text to speak");
-            resetSpeechState();
-            resetAllSpeakButtons();
-            button.disabled = true;
-          }
-        };
       });
 
       async function uploadPDF() {
@@ -1121,24 +742,21 @@
               li.className = "section-item";
               li.id = `section-${index}`;
               li.innerHTML = `
-          <h3>${section.heading || "Untitled Section"}</h3>
-          <p id="section-summary-${index}">${
+                <h3>${section.heading || "Untitled Section"}</h3>
+                <p id="section-summary-${index}">${
                 section.summary || "No summary available."
               }</p>
-          <button class="speak-btn speak-section-btn" data-index="${index}" title="Speak section summary">
-            <i class="fas fa-volume-up" aria-hidden="true"></i>
-          </button>
-          <p>Related: ${
-            section.related && section.related.length
-              ? section.related
-                  .map(
-                    (rel) =>
-                      `<a href="#section-${rel.index}" onclick="scrollToSection(${rel.index})">${rel.heading}</a>`
-                  )
-                  .join(", ")
-              : "None"
-          }</p>
-        `;
+                <p>Related: ${
+                  section.related && section.related.length
+                    ? section.related
+                        .map(
+                          (rel) =>
+                            `<a href="#section-${rel.index}" onclick="scrollToSection(${rel.index})">${rel.heading}</a>`
+                        )
+                        .join(", ")
+                    : "None"
+                }</p>
+              `;
               sectionList.appendChild(li);
 
               const option = document.createElement("option");
@@ -1182,7 +800,6 @@
         const questionBtn = document.getElementById("questionBtn");
         const status = document.getElementById("qaStatus");
         const answerText = document.getElementById("answerText");
-        const contentContainer = document.querySelector(".content-container");
         const sectionSelect = document.getElementById("sectionSelect");
         const question = questionInput.value.trim();
         const sectionIndex = sectionSelect.value;
@@ -1233,30 +850,12 @@
           status.textContent = "Question answered successfully!";
           status.classList.add("success");
           status.classList.remove("error");
-
-          // Add or update speak button for answer
-          let speakAnswerBtn = document.getElementById("speakAnswerBtn");
-          if (speakAnswerBtn) {
-            speakAnswerBtn.remove(); // Remove existing button to avoid duplicates
-          }
-          speakAnswerBtn = document.createElement("button");
-          speakAnswerBtn.id = "speakAnswerBtn";
-          speakAnswerBtn.className = "speak-btn";
-          speakAnswerBtn.title = "Speak answer in Indian English";
-          speakAnswerBtn.innerHTML =
-            '<i class="fas fa-volume-up" aria-hidden="true"></i>';
-          speakAnswerBtn.onclick = () => window.speakAnswer(speakAnswerBtn);
-          contentContainer.insertBefore(speakAnswerBtn, answerText);
-          speakAnswerBtn.disabled =
-            !result.answer || result.answer === "No answer available.";
           questionInput.value = "";
         } catch (error) {
           console.error("Question error:", error);
           status.textContent = `Error: ${error.message}`;
           status.classList.add("error");
           status.classList.remove("success");
-          const speakAnswerBtn = document.getElementById("speakAnswerBtn");
-          if (speakAnswerBtn) speakAnswerBtn.disabled = true;
         } finally {
           questionBtn.disabled = false;
         }
