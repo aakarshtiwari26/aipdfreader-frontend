@@ -664,7 +664,6 @@
       let extractedData = { text: "", sections: [] };
       let isSpeaking = false;
       let currentUtterance = null;
-      let activeButton = null;
 
       function stopSpeech() {
         window.speechSynthesis.cancel();
@@ -675,77 +674,39 @@
           btn.innerHTML = '<i class="fas fa-volume-up" aria-hidden="true"></i>';
           btn.disabled = false;
         });
-        activeButton = null;
         console.log("TTS: Speech stopped");
       }
 
       function speakText(text, button) {
         const startTime = performance.now();
-        if (
-          !text ||
-          text === "Answers will appear here." ||
-          text === "No summary available."
-        ) {
+        if (!text || text === "Answers will appear here." || text === "No summary available.") {
           console.log("TTS: Invalid text, cannot speak");
           button.disabled = true;
           return;
         }
 
-        if (isSpeaking && activeButton === button) {
-          if (window.speechSynthesis.paused) {
-            window.speechSynthesis.resume();
-            isSpeaking = true;
-            button.classList.remove("paused");
-            button.innerHTML =
-              '<i class="fas fa-pause" aria-hidden="true"></i>';
-            console.log(
-              `TTS: Resumed (${text.slice(0, 50)}${
-                text.length > 50 ? "..." : ""
-              })`
-            );
-            console.log(
-              `TTS: Resume latency: ${performance.now() - startTime}ms`
-            );
-            return;
-          } else {
-            window.speechSynthesis.pause();
-            isSpeaking = false;
-            button.classList.add("paused");
-            button.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
-            console.log(
-              `TTS: Paused (${text.slice(0, 50)}${
-                text.length > 50 ? "..." : ""
-              })`
-            );
-            console.log(
-              `TTS: Pause latency: ${performance.now() - startTime}ms`
-            );
-            return;
-          }
+        if (isSpeaking) {
+          stopSpeech();
         }
 
-        stopSpeech();
-
-        const voices = window.speechSynthesis.getVoices();
+        let voices = window.speechSynthesis.getVoices();
         if (!voices.length) {
           console.log("TTS: No voices available, waiting for voiceschanged...");
           window.speechSynthesis.onvoiceschanged = () => {
-            const retryVoices = window.speechSynthesis.getVoices();
-            if (retryVoices.length) {
+            voices = window.speechSynthesis.getVoices();
+            if (voices.length) {
               speakText(text, button); // Retry with voices
             } else {
               console.error("TTS: Failed to load voices");
               button.disabled = true;
             }
+            window.speechSynthesis.onvoiceschanged = null; // Clear handler
           };
           return;
         }
 
         const utterance = new SpeechSynthesisUtterance(text);
-        const preferredVoice =
-          voices.find((v) => v.lang === "en-IN") ||
-          voices.find((v) => v.lang === "en-US") ||
-          voices[0];
+        const preferredVoice = voices.find(v => v.lang === "en-IN") || voices.find(v => v.lang === "en-US") || voices[0];
         if (!preferredVoice) {
           console.error("TTS: No suitable voice found");
           button.disabled = true;
@@ -759,15 +720,9 @@
 
         utterance.onstart = () => {
           isSpeaking = true;
-          activeButton = button;
           button.classList.remove("paused");
           button.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
-          console.log(
-            `TTS: Started speaking (${preferredVoice.lang}, text: ${text.slice(
-              0,
-              50
-            )}${text.length > 50 ? "..." : ""})`
-          );
+          console.log(`TTS: Started speaking (${preferredVoice.lang}, text: ${text.slice(0, 50)}${text.length > 50 ? "..." : ""})`);
           console.log(`TTS: Play latency: ${performance.now() - startTime}ms`);
         };
 
@@ -783,11 +738,13 @@
         };
 
         currentUtterance = utterance;
-        activeButton = button;
         window.speechSynthesis.speak(utterance);
       }
 
       document.addEventListener("DOMContentLoaded", () => {
+        // Preload voices
+        window.speechSynthesis.getVoices();
+
         const uploadArea = document.getElementById("uploadArea");
         const pdfInput = document.getElementById("pdfInput");
         const uploadBtn = document.getElementById("uploadBtn");
@@ -841,22 +798,12 @@
           }
         });
 
-        let lastClickTime = 0;
         sectionList.addEventListener("click", (e) => {
-          const currentTime = performance.now();
-          if (currentTime - lastClickTime < 50) {
-            console.log("TTS: Click debounced");
-            return;
-          }
-          lastClickTime = currentTime;
-
           const btn = e.target.closest(".tts-btn");
           if (!btn) return;
 
           const index = btn.dataset.index;
-          const textElement = sectionList.querySelector(
-            `#section-text-${index}`
-          );
+          const textElement = sectionList.querySelector(`#section-text-${index}`);
           const text = textElement?.textContent.trim();
 
           if (!text || text === "No summary available.") {
@@ -865,38 +812,19 @@
             return;
           }
 
-          console.log(
-            `TTS: Triggered for section ${index} (${text.slice(0, 50)}${
-              text.length > 50 ? "..." : ""
-            })`
-          );
+          console.log(`TTS: Triggered for section ${index} (${text.slice(0, 50)}${text.length > 50 ? "..." : ""})`);
           speakText(text, btn);
         });
 
         window.speakAnswer = (btn) => {
-          const currentTime = performance.now();
-          if (currentTime - lastClickTime < 50) {
-            console.log("TTS: Click debounced");
-            return;
-          }
-          lastClickTime = currentTime;
-
           const text = answerText.textContent.trim();
-          if (
-            !text ||
-            text === "Answers will appear here." ||
-            text === "No answer available."
-          ) {
+          if (!text || text === "Answers will appear here." || text === "No answer available.") {
             console.log("TTS: No valid answer text");
             btn.disabled = true;
             return;
           }
 
-          console.log(
-            `TTS: Triggered for answer (${text.slice(0, 50)}${
-              text.length > 50 ? "..." : ""
-            })`
-          );
+          console.log(`TTS: Triggered for answer (${text.slice(0, 50)}${text.length > 50 ? "..." : ""})`);
           speakText(text, btn);
         };
 
@@ -975,13 +903,11 @@
               li.innerHTML = `
                 <h3>${section.heading || "Untitled Section"}</h3>
                 <p id="section-text-${index}">${
-                section.summary || "No summary available."
-              }</p>
+                  section.summary || "No summary available."
+                }</p>
                 <button class="tts-btn" data-index="${index}" title="Speak section summary" ${
-                !section.summary || section.summary === "No summary available."
-                  ? "disabled"
-                  : ""
-              }>
+                  !section.summary || section.summary === "No summary available." ? "disabled" : ""
+                }>
                   <i class="fas fa-volume-up" aria-hidden="true"></i>
                 </button>
                 <p>Related: ${
@@ -1097,11 +1023,9 @@
           ttsAnswerBtn.id = "ttsAnswerBtn";
           ttsAnswerBtn.className = "tts-btn";
           ttsAnswerBtn.title = "Speak answer in Indian English";
-          ttsAnswerBtn.innerHTML =
-            '<i class="fas fa-volume-up" aria-hidden="true"></i>';
+          ttsAnswerBtn.innerHTML = '<i class="fas fa-volume-up" aria-hidden="true"></i>';
           ttsAnswerBtn.onclick = () => window.speakAnswer(ttsAnswerBtn);
-          ttsAnswerBtn.disabled =
-            !result.answer || result.answer === "No answer available.";
+          ttsAnswerBtn.disabled = !result.answer || result.answer === "No answer available.";
           contentContainer.insertBefore(ttsAnswerBtn, answerText);
           questionInput.value = "";
         } catch (error) {
