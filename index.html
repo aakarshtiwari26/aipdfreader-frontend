@@ -744,6 +744,7 @@
           speechState.activeButton = null;
           speechState.currentText = "";
           speechState.pauseAttempt = 0;
+          console.log("TTS: Speech state reset");
         }
 
         window.addEventListener("scroll", () => {
@@ -809,7 +810,9 @@
               speechState.isSpeaking
             }, isPaused: ${
               speechState.isPaused
-            }, activeButton: ${!!speechState.activeButton}, utterance: ${!!speechState.currentUtterance}`
+            }, activeButton: ${!!speechState.activeButton}, utterance: ${!!speechState.currentUtterance}, textLength: ${
+              text.length
+            }`
           );
 
           // Handle pause/resume for same button
@@ -859,7 +862,7 @@
                   console.log(
                     `TTS: State after pause - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
                   );
-                }, 5); // 5ms delay to stabilize utterance
+                }, 5);
               } catch (error) {
                 console.error(
                   `TTS: Pause attempt ${speechState.pauseAttempt} failed, forcing cancel`,
@@ -986,10 +989,15 @@
 
           const text = answerText.textContent.trim();
           if (text && text !== "Answers will appear here.") {
-            console.log("TTS: Triggered for answer");
+            console.log(
+              "TTS: Triggered for answer",
+              text.substring(0, 50) + (text.length > 50 ? "..." : "")
+            );
             speakText(text, button);
           } else {
-            console.log("TTS: No answer text to speak");
+            console.log("TTS: No valid answer text to speak");
+            resetSpeechState();
+            resetAllSpeakButtons();
           }
         };
       });
@@ -1172,17 +1180,19 @@
 
           // Add or update speak button for answer
           let speakAnswerBtn = document.getElementById("speakAnswerBtn");
-          if (!speakAnswerBtn) {
-            speakAnswerBtn = document.createElement("button");
-            speakAnswerBtn.id = "speakAnswerBtn";
-            speakAnswerBtn.className = "speak-btn";
-            speakAnswerBtn.title = "Speak answer in Indian English";
-            speakAnswerBtn.innerHTML =
-              '<i class="fas fa-volume-up" aria-hidden="true"></i>';
-            speakAnswerBtn.onclick = () => window.speakAnswer(speakAnswerBtn);
-            contentContainer.insertBefore(speakAnswerBtn, answerText);
+          if (speakAnswerBtn) {
+            speakAnswerBtn.remove(); // Remove existing button to avoid duplicates
           }
-          speakAnswerBtn.disabled = false;
+          speakAnswerBtn = document.createElement("button");
+          speakAnswerBtn.id = "speakAnswerBtn";
+          speakAnswerBtn.className = "speak-btn";
+          speakAnswerBtn.title = "Speak answer in Indian English";
+          speakAnswerBtn.innerHTML =
+            '<i class="fas fa-volume-up" aria-hidden="true"></i>';
+          speakAnswerBtn.onclick = () => window.speakAnswer(speakAnswerBtn);
+          contentContainer.insertBefore(speakAnswerBtn, answerText);
+          speakAnswerBtn.disabled =
+            !result.answer || result.answer === "No answer available.";
           questionInput.value = "";
         } catch (error) {
           console.error("Question error:", error);
