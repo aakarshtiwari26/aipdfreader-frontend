@@ -681,7 +681,8 @@
       function preloadVoices() {
         voices = window.speechSynthesis.getVoices();
         if (!voices.length) {
-          // Trigger multiple times to force browser to load voices
+          // Force browser to load voices with multiple calls
+          window.speechSynthesis.getVoices();
           window.speechSynthesis.getVoices();
           setTimeout(() => {
             voices = window.speechSynthesis.getVoices();
@@ -701,6 +702,7 @@
       // Initialize voices on page load
       document.addEventListener("DOMContentLoaded", () => {
         preloadVoices();
+        // Minimal onvoiceschanged to update voices if changed
         window.speechSynthesis.onvoiceschanged = () => {
           voices = window.speechSynthesis.getVoices();
           console.log(
@@ -789,14 +791,6 @@
             return;
           }
 
-          // Stop any ongoing speech
-          window.speechSynthesis.cancel();
-          resetAllSpeakButtons(button);
-          isSpeaking = false;
-          isPaused = false;
-          currentUtterance = null;
-          activeButton = null;
-
           // Handle pause/resume for same button
           if (activeButton === button && currentUtterance) {
             if (isPaused) {
@@ -829,6 +823,14 @@
               return;
             }
           }
+
+          // Stop any ongoing speech
+          window.speechSynthesis.cancel();
+          resetAllSpeakButtons(button);
+          isSpeaking = false;
+          isPaused = false;
+          currentUtterance = null;
+          activeButton = null;
 
           // Ensure voices are available
           if (!voices.length) {
@@ -892,14 +894,15 @@
         }
 
         sectionList.addEventListener("click", (e) => {
-          if (e.target.classList.contains("speak-section-btn")) {
-            const index = e.target.dataset.index;
+          const btn = e.target.closest(".speak-section-btn");
+          if (btn) {
+            const index = btn.dataset.index;
             const text = sectionList
               .querySelector(`#section-summary-${index}`)
               ?.textContent.trim();
             if (text) {
               console.log("TTS: Triggered for section", index);
-              speakText(text, e.target);
+              speakText(text, btn);
             } else {
               console.log("TTS: No summary text for section", index);
             }
