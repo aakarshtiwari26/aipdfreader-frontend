@@ -681,11 +681,9 @@
       };
       let voices = [];
 
-      // Robust voice initialization
       function preloadVoices() {
         voices = window.speechSynthesis.getVoices();
         if (!voices.length) {
-          console.log("TTS: Initial voices empty, retrying...");
           let attempts = 0;
           const maxAttempts = 3;
           const retryInterval = setInterval(() => {
@@ -694,533 +692,151 @@
               clearInterval(retryInterval);
               console.log(
                 voices.length
-                  ? `TTS: Voices loaded after ${
-                      attempts + 1
-                    } attempts: ${voices.map((v) => v.lang)}`
-                  : "TTS: Failed to load voices after max attempts"
+                  ? `TTS: Voices loaded after ${attempts + 1} attempts`
+                  : "TTS: Failed to load voices"
               );
             }
             attempts++;
           }, 100);
-        } else {
-          console.log(
-            "TTS: Voices preloaded",
-            voices.map((v) => v.lang)
-          );
         }
       }
 
-      // Initialize voices on page load
+      function resetAllSpeakButtons(excludeButton = null) {
+        requestAnimationFrame(() => {
+          document.querySelectorAll(".speak-btn").forEach((btn) => {
+            if (btn !== excludeButton) {
+              btn.classList.remove("paused");
+              btn.innerHTML =
+                '<i class="fas fa-volume-up" aria-hidden="true"></i>';
+            }
+          });
+        });
+      }
+
+      function resetSpeechState() {
+        window.speechSynthesis.cancel();
+        speechState.isSpeaking = false;
+        speechState.isPaused = false;
+        speechState.currentUtterance = null;
+        speechState.activeButton = null;
+        speechState.currentText = "";
+        speechState.pauseAttempt = 0;
+      }
+
+      function speakText(text, button) {
+        if (!text) return;
+
+        if (
+          speechState.activeButton === button &&
+          speechState.currentUtterance
+        ) {
+          if (speechState.isPaused) {
+            window.speechSynthesis.resume();
+            speechState.isPaused = false;
+            speechState.isSpeaking = true;
+            button.classList.remove("paused");
+            button.innerHTML =
+              '<i class="fas fa-pause" aria-hidden="true"></i>';
+            return;
+          } else if (speechState.isSpeaking) {
+            window.speechSynthesis.pause();
+            speechState.isPaused = true;
+            speechState.isSpeaking = false;
+            button.classList.add("paused");
+            button.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
+            return;
+          }
+        }
+
+        resetSpeechState();
+        resetAllSpeakButtons(button);
+        speechState.currentText = text;
+
+        if (!voices.length) {
+          voices = window.speechSynthesis.getVoices();
+          if (!voices.length) {
+            preloadVoices();
+            console.warn("TTS: No voices available");
+            return;
+          }
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        const selectedVoice =
+          voices.find((v) => v.lang === "en-IN") ||
+          voices.find((v) => v.lang === "en-US") ||
+          voices[0];
+
+        if (!selectedVoice) {
+          console.warn("TTS: No suitable voice found");
+          return;
+        }
+
+        utterance.voice = selectedVoice;
+        utterance.lang = selectedVoice.lang;
+        utterance.pitch = 1;
+        utterance.rate = 1;
+        utterance.volume = 1;
+
+        utterance.onstart = () => {
+          speechState.isSpeaking = true;
+          speechState.activeButton = button;
+          button.classList.remove("paused");
+          button.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
+        };
+
+        utterance.onend = () => {
+          resetSpeechState();
+          resetAllSpeakButtons();
+        };
+
+        utterance.onerror = () => {
+          resetSpeechState();
+          resetAllSpeakButtons();
+          console.error("TTS: An error occurred during speech synthesis.");
+        };
+
+        speechState.currentUtterance = utterance;
+        window.speechSynthesis.speak(utterance);
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
         preloadVoices();
+
         window.speechSynthesis.onvoiceschanged = () => {
           voices = window.speechSynthesis.getVoices();
           console.log(
-            "TTS: Voices updated",
+            "TTS: Voices updated:",
             voices.map((v) => v.lang)
           );
         };
 
-        const uploadArea = document.getElementById("uploadArea");
-        const pdfInput = document.getElementById("pdfInput");
-        const uploadBtn = document.getElementById("uploadBtn");
-        const progressCircle = document.getElementById("progressCircle");
         const sectionList = document.getElementById("sectionList");
-        const sectionSelect = document.getElementById("sectionSelect");
         const answerText = document.getElementById("answerText");
-        const questionInput = document.getElementById("questionInput");
 
-        // Reset all speaker buttons' state
-        function resetAllSpeakButtons(excludeButton = null) {
-          requestAnimationFrame(() => {
-            document.querySelectorAll(".speak-btn").forEach((btn) => {
-              if (btn !== excludeButton) {
-                btn.classList.remove("paused");
-                btn.innerHTML =
-                  '<i class="fas fa-volume-up" aria-hidden="true"></i>';
-              }
-            });
-          });
-        }
-
-        // Reset speech state
-        function resetSpeechState() {
-          window.speechSynthesis.cancel();
-          speechState.isSpeaking = false;
-          speechState.isPaused = false;
-          speechState.currentUtterance = null;
-          speechState.activeButton = null;
-          speechState.currentText = "";
-          speechState.pauseAttempt = 0;
-          console.log("TTS: Speech state reset");
-        }
-
-        window.addEventListener("scroll", () => {
-          const header = document.querySelector(".header");
-          header.classList.toggle("sticky", window.scrollY > 0);
-        });
-
-        pdfInput.addEventListener("change", () => {
-          uploadBtn.disabled = !pdfInput.files[0];
-          const status = document.getElementById("uploadStatus");
-          status.textContent = pdfInput.files[0]
-            ? `Selected: ${pdfInput.files[0].name}`
-            : "";
-          status.classList.remove("error", "success");
-        });
-
-        uploadArea.addEventListener("click", () => pdfInput.click());
-        uploadArea.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          uploadArea.classList.add("active");
-        });
-        uploadArea.addEventListener("dragleave", () => {
-          uploadArea.classList.remove("active");
-        });
-        uploadArea.addEventListener("drop", (e) => {
-          e.preventDefault();
-          uploadArea.classList.remove("active");
-          pdfInput.files = e.dataTransfer.files;
-          uploadBtn.disabled = !pdfInput.files[0];
-          const status = document.getElementById("uploadStatus");
-          status.textContent = pdfInput.files[0]
-            ? `Selected: ${pdfInput.files[0].name}`
-            : "";
-          status.classList.remove("error", "success");
-        });
-
-        questionInput.addEventListener("keydown", (e) => {
-          if (
-            e.key === "Enter" &&
-            !document.getElementById("questionBtn").disabled
-          ) {
-            console.log("Enter key pressed, triggering askQuestion");
-            askQuestion();
-          }
-        });
-
-        function simulateProgress() {
-          progressCircle.classList.add("active");
-          setTimeout(() => {
-            progressCircle.classList.remove("active");
-          }, 2000);
-        }
-
-        function speakText(text, button) {
-          const startTime = performance.now();
-          if (!text) {
-            console.log("TTS: No text to speak");
-            return;
-          }
-
-          console.log(
-            `TTS: State before action - isSpeaking: ${
-              speechState.isSpeaking
-            }, isPaused: ${
-              speechState.isPaused
-            }, activeButton: ${!!speechState.activeButton}, utterance: ${!!speechState.currentUtterance}, textLength: ${
-              text.length
-            }`
-          );
-
-          // Handle pause/resume for same button
-          if (
-            speechState.activeButton === button &&
-            speechState.currentUtterance
-          ) {
-            if (speechState.isPaused) {
-              console.log("TTS: Resuming speech");
-              window.speechSynthesis.resume();
-              speechState.isPaused = false;
-              speechState.isSpeaking = true;
-              speechState.pauseAttempt = 0;
-              requestAnimationFrame(() => {
-                button.classList.remove("paused");
-                button.innerHTML =
-                  '<i class="fas fa-pause" aria-hidden="true"></i>';
-              });
-              console.log(
-                `TTS: Resume latency: ${performance.now() - startTime}ms`
-              );
-              console.log(
-                `TTS: State after resume - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-              );
-              return;
-            } else if (speechState.isSpeaking) {
-              speechState.pauseAttempt++;
-              console.log(
-                `TTS: Attempting to pause speech (attempt ${speechState.pauseAttempt})`
-              );
-              try {
-                setTimeout(() => {
-                  window.speechSynthesis.pause();
-                  speechState.isPaused = true;
-                  speechState.isSpeaking = false;
-                  speechState.currentText = text;
-                  requestAnimationFrame(() => {
-                    button.classList.add("paused");
-                    button.innerHTML =
-                      '<i class="fas fa-play" aria-hidden="true"></i>';
-                  });
-                  console.log(
-                    `TTS: Pause attempt ${speechState.pauseAttempt} latency: ${
-                      performance.now() - startTime
-                    }ms`
-                  );
-                  console.log(
-                    `TTS: State after pause - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-                  );
-                }, 5);
-              } catch (error) {
-                console.error(
-                  `TTS: Pause attempt ${speechState.pauseAttempt} failed, forcing cancel`,
-                  error
-                );
-                resetSpeechState();
-                speechState.isPaused = true;
-                speechState.currentText = text;
-                requestAnimationFrame(() => {
-                  button.classList.add("paused");
-                  button.innerHTML =
-                    '<i class="fas fa-play" aria-hidden="true"></i>';
-                });
-                console.log(
-                  `TTS: Forced pause attempt ${
-                    speechState.pauseAttempt
-                  } latency: ${performance.now() - startTime}ms`
-                );
-                console.log(
-                  `TTS: State after forced pause - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-                );
-              }
-              return;
-            }
-          }
-
-          // Stop any ongoing speech
-          resetSpeechState();
-          resetAllSpeakButtons(button);
-          speechState.currentText = text;
-
-          // Ensure voices are available
-          if (!voices.length) {
-            voices = window.speechSynthesis.getVoices();
-            if (!voices.length) {
-              console.error("TTS: No voices available, retrying...");
-              preloadVoices();
-              return;
-            }
-          }
-
-          // Create new utterance
-          const utterance = new SpeechSynthesisUtterance(text);
-          const indianVoice =
-            voices.find((voice) => voice.lang === "en-IN") ||
-            voices.find((voice) => voice.lang === "en-US") ||
-            voices[0];
-          if (!indianVoice) {
-            console.error("TTS: No suitable voice found");
-            resetSpeechState();
-            return;
-          }
-          utterance.voice = indianVoice;
-          utterance.lang = indianVoice.lang;
-          utterance.pitch = 1;
-          utterance.rate = 1;
-          utterance.volume = 1;
-
-          utterance.onstart = () => {
-            console.log(`TTS: Speaking started (${indianVoice.lang})`);
-            speechState.isSpeaking = true;
-            speechState.isPaused = false;
-            speechState.activeButton = button;
-            speechState.pauseAttempt = 0;
-            requestAnimationFrame(() => {
-              button.classList.remove("paused");
-              button.innerHTML =
-                '<i class="fas fa-pause" aria-hidden="true"></i>';
-            });
-            console.log(
-              `TTS: Play latency: ${performance.now() - startTime}ms`
-            );
-            console.log(
-              `TTS: State after play - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-            );
-          };
-          utterance.onend = () => {
-            console.log("TTS: Speaking ended");
-            resetSpeechState();
-            resetAllSpeakButtons();
-            console.log(
-              `TTS: State after end - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-            );
-          };
-          utterance.onerror = (event) => {
-            console.error("TTS error:", event.error);
-            resetSpeechState();
-            resetAllSpeakButtons();
-            console.log(
-              `TTS: State after error - isSpeaking: ${speechState.isSpeaking}, isPaused: ${speechState.isPaused}`
-            );
-          };
-
-          window.speechSynthesis.speak(utterance);
-          speechState.currentUtterance = utterance;
-          speechState.activeButton = button;
-        }
-
-        // Debounce clicks to prevent rapid-fire issues
-        let lastClickTime = 0;
-        sectionList.addEventListener("click", (e) => {
-          const currentTime = performance.now();
-          if (currentTime - lastClickTime < 50) return; // Debounce 50ms
-          lastClickTime = currentTime;
-
+        // Section button handler
+        sectionList?.addEventListener("click", (e) => {
           const btn = e.target.closest(".speak-section-btn");
           if (btn) {
             const index = btn.dataset.index;
             const text = sectionList
               .querySelector(`#section-summary-${index}`)
               ?.textContent.trim();
-            if (text) {
-              console.log(
-                "TTS: Triggered for section",
-                index,
-                text.substring(0, 50) + (text.length > 50 ? "..." : "")
-              );
-              speakText(text, btn);
-            } else {
-              console.log("TTS: No summary text for section", index);
-            }
-          } else {
-            console.log("TTS: No section button clicked");
+            if (text) speakText(text, btn);
           }
         });
 
-        window.simulateProgress = simulateProgress;
+        // Answer speaker button logic
         window.speakAnswer = (button) => {
-          const currentTime = performance.now();
-          if (currentTime - lastClickTime < 50) return; // Debounce 50ms
-          lastClickTime = currentTime;
-
-          const text = answerText.textContent.trim();
+          const text = answerText?.textContent.trim();
           if (text && text !== "Answers will appear here.") {
-            console.log(
-              "TTS: Triggered for answer",
-              text.substring(0, 50) + (text.length > 50 ? "..." : "")
-            );
             speakText(text, button);
           } else {
-            console.log("TTS: No valid answer text to speak");
             resetSpeechState();
             resetAllSpeakButtons();
           }
         };
       });
-
-      async function uploadPDF() {
-        const pdfInput = document.getElementById("pdfInput");
-        const uploadBtn = document.getElementById("uploadBtn");
-        const status = document.getElementById("uploadStatus");
-        const sectionList = document.getElementById("sectionList");
-        const sectionSelect = document.getElementById("sectionSelect");
-
-        if (!pdfInput.files[0]) {
-          status.textContent = "Please select a PDF file.";
-          status.classList.add("error");
-          status.classList.remove("success");
-          return;
-        }
-
-        if (pdfInput.files[0].size > 10 * 1024 * 1024) {
-          status.textContent = "File size exceeds 10MB limit.";
-          status.classList.add("error");
-          status.classList.remove("success");
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append("pdf", pdfInput.files[0]);
-
-        uploadBtn.disabled = true;
-        status.textContent = "Uploading and processing PDF...";
-        status.classList.remove("error", "success");
-        sectionList.classList.remove("slide-in");
-        window.simulateProgress();
-
-        try {
-          const response = await fetch(
-            "https://aipdfreader-0f7m.onrender.com/api/upload",
-            {
-              method: "POST",
-              body: formData,
-              credentials: "include",
-            }
-          );
-
-          const result = await response.json();
-          if (!response.ok) {
-            throw new Error(
-              result.error || `HTTP error! Status: ${response.status}`
-            );
-          }
-
-          extractedData = {
-            text: result.text || "",
-            sections: Array.isArray(result.sections) ? result.sections : [],
-          };
-          sectionList.innerHTML = extractedData.sections.length
-            ? ""
-            : "<li>No sections detected. Showing full document.</li>";
-          sectionSelect.innerHTML =
-            '<option value="">Select a section (optional)</option>';
-
-          if (Array.isArray(extractedData.sections)) {
-            extractedData.sections.forEach((section, index) => {
-              const li = document.createElement("li");
-              li.className = "section-item";
-              li.id = `section-${index}`;
-              li.innerHTML = `
-          <h3>${section.heading || "Untitled Section"}</h3>
-          <p id="section-summary-${index}">${
-                section.summary || "No summary available."
-              }</p>
-          <button class="speak-btn speak-section-btn" data-index="${index}" title="Speak section summary">
-            <i class="fas fa-volume-up" aria-hidden="true"></i>
-          </button>
-          <p>Related: ${
-            section.related && section.related.length
-              ? section.related
-                  .map(
-                    (rel) =>
-                      `<a href="#section-${rel.index}" onclick="scrollToSection(${rel.index})">${rel.heading}</a>`
-                  )
-                  .join(", ")
-              : "None"
-          }</p>
-        `;
-              sectionList.appendChild(li);
-
-              const option = document.createElement("option");
-              option.value = index;
-              option.textContent = section.heading || "Untitled Section";
-              sectionSelect.appendChild(option);
-            });
-          }
-
-          sectionList.classList.add("slide-in");
-          status.textContent = "PDF processed successfully!";
-          status.classList.add("success");
-          status.classList.remove("error");
-          document.getElementById("questionBtn").disabled = false;
-          sectionSelect.disabled = !extractedData.sections.length;
-          pdfInput.value = "";
-          uploadBtn.disabled = true;
-        } catch (error) {
-          console.error("Upload error:", error);
-          status.textContent = `Error: ${error.message}`;
-          status.classList.add("error");
-          status.classList.remove("success");
-          sectionList.innerHTML = "<li>Failed to process PDF.</li>";
-          sectionSelect.innerHTML =
-            '<option value="">Select a section (optional)</option>';
-          sectionSelect.disabled = true;
-        } finally {
-          uploadBtn.disabled = !pdfInput.files[0];
-        }
-      }
-
-      function scrollToSection(index) {
-        const section = document.querySelector(`#section-${index}`);
-        if (section) {
-          section.scrollIntoView({ behavior: "smooth" });
-        }
-      }
-
-      async function askQuestion() {
-        const questionInput = document.getElementById("questionInput");
-        const questionBtn = document.getElementById("questionBtn");
-        const status = document.getElementById("qaStatus");
-        const answerText = document.getElementById("answerText");
-        const contentContainer = document.querySelector(".content-container");
-        const sectionSelect = document.getElementById("sectionSelect");
-        const question = questionInput.value.trim();
-        const sectionIndex = sectionSelect.value;
-
-        if (!question) {
-          status.textContent = "Please enter a question.";
-          status.classList.add("error");
-          status.classList.remove("success");
-          return;
-        }
-
-        if (!extractedData.text && !extractedData.sections.length) {
-          status.textContent = "Please upload a PDF first.";
-          status.classList.add("error");
-          status.classList.remove("success");
-          return;
-        }
-
-        questionBtn.disabled = true;
-        status.textContent = "Fetching answer...";
-        status.classList.remove("error", "success");
-        answerText.classList.remove("slide-in");
-
-        try {
-          const response = await fetch(
-            "https://aipdfreader-0f7m.onrender.com/api/ask",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                question,
-                context: extractedData,
-                sectionIndex,
-              }),
-              credentials: "include",
-            }
-          );
-
-          const result = await response.json();
-          if (!response.ok) {
-            throw new Error(
-              result.error || `HTTP error! Status: ${response.status}`
-            );
-          }
-
-          answerText.textContent = result.answer || "No answer available.";
-          answerText.classList.add("slide-in");
-          status.textContent = "Question answered successfully!";
-          status.classList.add("success");
-          status.classList.remove("error");
-
-          // Add or update speak button for answer
-          let speakAnswerBtn = document.getElementById("speakAnswerBtn");
-          if (speakAnswerBtn) {
-            speakAnswerBtn.remove(); // Remove existing button to avoid duplicates
-          }
-          speakAnswerBtn = document.createElement("button");
-          speakAnswerBtn.id = "speakAnswerBtn";
-          speakAnswerBtn.className = "speak-btn";
-          speakAnswerBtn.title = "Speak answer in Indian English";
-          speakAnswerBtn.innerHTML =
-            '<i class="fas fa-volume-up" aria-hidden="true"></i>';
-          speakAnswerBtn.onclick = () => window.speakAnswer(speakAnswerBtn);
-          contentContainer.insertBefore(speakAnswerBtn, answerText);
-          speakAnswerBtn.disabled =
-            !result.answer || result.answer === "No answer available.";
-          questionInput.value = "";
-        } catch (error) {
-          console.error("Question error:", error);
-          status.textContent = `Error: ${error.message}`;
-          status.classList.add("error");
-          status.classList.remove("success");
-          const speakAnswerBtn = document.getElementById("speakAnswerBtn");
-          if (speakAnswerBtn) speakAnswerBtn.disabled = true;
-        } finally {
-          questionBtn.disabled = false;
-        }
-      }
     </script>
   </body>
 </html>
