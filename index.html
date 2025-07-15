@@ -662,24 +662,20 @@
     </footer>
     <script>
       let extractedData = { text: "", sections: [] };
-      const ttsState = {
-        isSpeaking: false,
-        isPaused: false,
-        currentUtterance: null,
-        activeButton: null,
-      };
+      let isSpeaking = false;
+      let currentUtterance = null;
+      let activeButton = null;
 
       function stopSpeech() {
         window.speechSynthesis.cancel();
-        ttsState.isSpeaking = false;
-        ttsState.isPaused = false;
-        ttsState.currentUtterance = null;
+        isSpeaking = false;
+        currentUtterance = null;
         document.querySelectorAll(".tts-btn").forEach((btn) => {
           btn.classList.remove("paused");
           btn.innerHTML = '<i class="fas fa-volume-up" aria-hidden="true"></i>';
           btn.disabled = false;
         });
-        ttsState.activeButton = null;
+        activeButton = null;
         console.log("TTS: Speech stopped");
       }
 
@@ -695,16 +691,50 @@
           return;
         }
 
-        // Load voices
+        if (isSpeaking && activeButton === button) {
+          if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+            isSpeaking = true;
+            button.classList.remove("paused");
+            button.innerHTML =
+              '<i class="fas fa-pause" aria-hidden="true"></i>';
+            console.log(
+              `TTS: Resumed (${text.slice(0, 50)}${
+                text.length > 50 ? "..." : ""
+              })`
+            );
+            console.log(
+              `TTS: Resume latency: ${performance.now() - startTime}ms`
+            );
+            return;
+          } else {
+            window.speechSynthesis.pause();
+            isSpeaking = false;
+            button.classList.add("paused");
+            button.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
+            console.log(
+              `TTS: Paused (${text.slice(0, 50)}${
+                text.length > 50 ? "..." : ""
+              })`
+            );
+            console.log(
+              `TTS: Pause latency: ${performance.now() - startTime}ms`
+            );
+            return;
+          }
+        }
+
+        stopSpeech();
+
         const voices = window.speechSynthesis.getVoices();
         if (!voices.length) {
-          console.log("TTS: No voices available, retrying...");
+          console.log("TTS: No voices available, waiting for voiceschanged...");
           window.speechSynthesis.onvoiceschanged = () => {
             const retryVoices = window.speechSynthesis.getVoices();
             if (retryVoices.length) {
               speakText(text, button); // Retry with voices
             } else {
-              console.error("TTS: Failed to load voices after retry");
+              console.error("TTS: Failed to load voices");
               button.disabled = true;
             }
           };
@@ -728,9 +758,8 @@
         utterance.volume = 1;
 
         utterance.onstart = () => {
-          ttsState.isSpeaking = true;
-          ttsState.isPaused = false;
-          ttsState.activeButton = button;
+          isSpeaking = true;
+          activeButton = button;
           button.classList.remove("paused");
           button.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
           console.log(
@@ -753,8 +782,8 @@
           button.disabled = true;
         };
 
-        ttsState.currentUtterance = utterance;
-        ttsState.activeButton = button;
+        currentUtterance = utterance;
+        activeButton = button;
         window.speechSynthesis.speak(utterance);
       }
 
@@ -836,45 +865,12 @@
             return;
           }
 
-          if (ttsState.activeButton === btn && ttsState.currentUtterance) {
-            const startTime = performance.now();
-            if (ttsState.isPaused) {
-              window.speechSynthesis.resume();
-              ttsState.isPaused = false;
-              ttsState.isSpeaking = true;
-              btn.classList.remove("paused");
-              btn.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
-              console.log(
-                `TTS: Resumed section ${index} (${text.slice(0, 50)}${
-                  text.length > 50 ? "..." : ""
-                })`
-              );
-              console.log(
-                `TTS: Resume latency: ${performance.now() - startTime}ms`
-              );
-            } else if (ttsState.isSpeaking) {
-              window.speechSynthesis.pause();
-              ttsState.isPaused = true;
-              ttsState.isSpeaking = false;
-              btn.classList.add("paused");
-              btn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
-              console.log(
-                `TTS: Paused section ${index} (${text.slice(0, 50)}${
-                  text.length > 50 ? "..." : ""
-                })`
-              );
-              console.log(
-                `TTS: Pause latency: ${performance.now() - startTime}ms`
-              );
-            }
-          } else {
-            console.log(
-              `TTS: Triggered for section ${index} (${text.slice(0, 50)}${
-                text.length > 50 ? "..." : ""
-              })`
-            );
-            speakText(text, btn);
-          }
+          console.log(
+            `TTS: Triggered for section ${index} (${text.slice(0, 50)}${
+              text.length > 50 ? "..." : ""
+            })`
+          );
+          speakText(text, btn);
         });
 
         window.speakAnswer = (btn) => {
@@ -896,45 +892,12 @@
             return;
           }
 
-          if (ttsState.activeButton === btn && ttsState.currentUtterance) {
-            const startTime = performance.now();
-            if (ttsState.isPaused) {
-              window.speechSynthesis.resume();
-              ttsState.isPaused = false;
-              ttsState.isSpeaking = true;
-              btn.classList.remove("paused");
-              btn.innerHTML = '<i class="fas fa-pause" aria-hidden="true"></i>';
-              console.log(
-                `TTS: Resumed answer (${text.slice(0, 50)}${
-                  text.length > 50 ? "..." : ""
-                })`
-              );
-              console.log(
-                `TTS: Resume latency: ${performance.now() - startTime}ms`
-              );
-            } else if (ttsState.isSpeaking) {
-              window.speechSynthesis.pause();
-              ttsState.isPaused = true;
-              ttsState.isSpeaking = false;
-              btn.classList.add("paused");
-              btn.innerHTML = '<i class="fas fa-play" aria-hidden="true"></i>';
-              console.log(
-                `TTS: Paused answer (${text.slice(0, 50)}${
-                  text.length > 50 ? "..." : ""
-                })`
-              );
-              console.log(
-                `TTS: Pause latency: ${performance.now() - startTime}ms`
-              );
-            }
-          } else {
-            console.log(
-              `TTS: Triggered for answer (${text.slice(0, 50)}${
-                text.length > 50 ? "..." : ""
-              })`
-            );
-            speakText(text, btn);
-          }
+          console.log(
+            `TTS: Triggered for answer (${text.slice(0, 50)}${
+              text.length > 50 ? "..." : ""
+            })`
+          );
+          speakText(text, btn);
         };
 
         function simulateProgress() {
